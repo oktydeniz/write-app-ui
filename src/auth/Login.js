@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from 'network/AuthService';
 import '../assets/style/main.scss';
-import loginArt from '../assets/img/login_art.png';
 import google from '../assets/img/google.svg';
+
 const Login = () => {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
@@ -82,13 +82,13 @@ const Login = () => {
                             <img src={google}/>
                             <span>Sign in with Google</span>
                         </div>
-                        <div className="alignCenter mt20">Don't you have an account? <span className="link">Sign up</span></div>
+                        <div className="alignCenter mt20">Don't you have an account? <span onClick={(e) => {
+                            navigate('/register')
+                        }} className="link">Sign up</span></div>
                         <div className="info-right-reserved">© 2024 | WhitePulp Media | ALL RIGHTS RESERVED</div>
                     </div>
                 </div>
-                <div className="login-art">
-                    <img src={loginArt}/>
-                </div>
+            
             </div>
 
         </div>

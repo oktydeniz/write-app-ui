@@ -1,0 +1,181 @@
+/* Genel düzen */
+.app-container {
+    display: flex;
+    flex-direction: column; /* Yüksekliği yukarıdan aşağıya doğru yerleştirin */
+    height: 100vh; /* Tam ekran yüksekliği */
+  }
+  
+  /* Layout stil */
+  .layout {
+    display: flex;
+    flex: 1; /* İçerik alanı ve Sidebar, AppBar ile uyumlu olacak şekilde düzenlenir */
+  }
+  
+  /* Sidebar stilleri */
+  .sidebar {
+    width: 200px; /* Sidebar genişliği */
+    height: 100vh;
+    background-color: #2c3e50; /* Sidebar arka plan rengi */
+    color: #ecf0f1; /* Yazı rengi */
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+  
+  /* Sidebar içeriği */
+  .sidebar-header {
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #ecf0f1;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+  }
+  
+  .sidebar-nav a.active,
+  .sidebar-nav a:hover {
+    background-color: #3498db; /* Aktif ve hover arka plan rengi */
+    color: #fff;
+  }
+  
+  .sidebar-divider {
+    margin: 10px 0;
+  }
+  
+  /* App Bar stili */
+  .app-bar {
+    height: 60px;
+    background-color: #34495e; /* AppBar arka plan rengi */
+    color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 200px; /* Sidebar genişliğine göre sol marj */
+    right: 0;
+    z-index: 1000; /* AppBar'ın en üstte olması için */
+  }
+  
+  /* App Bar Search */
+  .search-bar {
+    flex: 1;
+  }
+  
+  .search-bar input {
+    width: 95%;
+    border-radius: 5px;
+    outline: none;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+  }
+  
+  /* App Bar Icons */
+  .app-bar-icons {
+    display: flex;
+    align-items: center;
+  }
+  
+  .icon-wrapper {
+    position: relative;
+    margin-left: 15px;
+    cursor: pointer;
+  }
+  
+  .icon-wrapper .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 12px;
+  }
+  
+  .avatar {
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 15px;
+  }
+  
+  /* İçerik alanı */
+  .content {
+    margin-left: 200px; /* Sidebar genişliğine göre marj */
+    padding-top: 60px; /* AppBar yüksekliği kadar yukarıdan marj */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* İçerik alanı stil */
+  .content-area {
+    padding: 20px;
+    flex: 1;
+  }
+  
+  .fragment-content {
+    margin: 15px;
+  }
+  
+  /* Dropdown Menu */
+  .dropdown-menu {
+    position: absolute;
+    top: 60px; /* AppBar yüksekliği kadar yukarıdan marj */
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    z-index: 1000;
+  }
+  
+  .dropdown-header {
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .dropdown-item {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .dropdown-divider {
+    margin: 0;
+    border-top: 1px solid #ddd;
+  }
+  
+  .floating-btn {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+  }

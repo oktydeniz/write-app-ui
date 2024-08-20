@@ -1,4 +1,5 @@
 @import './variables.scss';
+@import './dimen.scss';
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -168,3 +169,16 @@ input:focus {
 .errors {
   color: red;
 }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  margin-right: 10px;
+  transform: scale(1.2);
+}
+
