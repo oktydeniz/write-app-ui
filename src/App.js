@@ -7,6 +7,7 @@ import Layout from 'components/Layout.js';
 import NotFound from 'screen/NotFound.js';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Contents from 'home/Contents';
+import ContentDetail from 'home/content/ContentDetail';
 
 const App = () => {
  
@@ -24,6 +25,7 @@ const App = () => {
                 <Route index element={<Home />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/contents" element={<Contents />} />
+                <Route path="/content/:contentSlug" element={<ContentDetail />} />
                 <Route path="/activities" element={<Home />} />
                 <Route path="/teams" element={<Home />} />
                 <Route path="/bookmarks" element={<Home />} />

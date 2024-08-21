@@ -48,3 +48,26 @@ export const getMyContents = async () => {
       }
 
 }
+export const getContentBySlug = async (slug) => {
+
+  try {
+      const response = await fetch(`${BASE_URL}/content/${slug}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `${getToken()}`,
+            'Content-Type': 'application/json',
+            'Accept-Language': userLanguage
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Save failed');
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error:', error.message);
+      throw error;
+    }
+
+}

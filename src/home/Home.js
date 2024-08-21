@@ -161,17 +161,14 @@ const Home = () => {
       tags:selectedTagValue,
       isFree:isChecked
     };
-    debugger;
     try{
       const result = await saveNewContentData('/content', data);
       if (result.success){
-        console.log('Success' + result);
         navigate('/contents');
       }
     } catch (error) {
       console.error(error);
     }
-    
   }
 
   useEffect(() => {

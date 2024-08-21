@@ -5,8 +5,8 @@ import '../assets/style/main.scss';
 import google from '../assets/img/google.svg';
 
 const Login = () => {
-    const [identifier, setIdentifier] = useState('');
-    const [password, setPassword] = useState('');
+    const [identifier, setIdentifier] = useState('odeniz');
+    const [password, setPassword] = useState('Aslankaplan77?');
     const [errors, setErrors] = useState('');
     const navigate = useNavigate();
 
