@@ -175,7 +175,10 @@
   }
   
   .floating-btn {
-    position: absolute !important;
-    bottom: 10px !important;
-    right: 10px !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    margin: 10px !important;
+    padding: 10px !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
   }

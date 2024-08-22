@@ -36,7 +36,7 @@ const Contents = () => {
     return (
         <div className="contents-container">
         {contents.map((item) => (
-            <Card onClick={() => handleCardClick(item.slug)} className='content-card' sx={{ display: 'flex', maxWidth: 450,margin:'10px'}}>
+            <Card onClick={() => handleCardClick(item.slug)} key={item.slug} className='content-card' sx={{ display: 'flex', maxWidth: 450,margin:'10px'}}>
             <CardMedia
               component="img"
               sx={{ width: 140 }}

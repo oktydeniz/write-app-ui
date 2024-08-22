@@ -4,6 +4,7 @@ import Login from 'auth/Login.js';
 import Register from 'auth/Register.js';
 import Home from 'home/Home.js';
 import Layout from 'components/Layout.js';
+import './App.css';
 import NotFound from 'screen/NotFound.js';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Contents from 'home/Contents';
@@ -24,8 +25,8 @@ const App = () => {
               <Route element={<Layout />}>
                 <Route index element={<Home />} />
                 <Route path="/home" element={<Home />} />
-                <Route path="/contents" element={<Contents />} />
-                <Route path="/content/:contentSlug" element={<ContentDetail />} />
+                <Route path="/contents" element={<Contents />} />[
+                <Route path="/content/:contentSlug" element={<ContentDetail />} />]
                 <Route path="/activities" element={<Home />} />
                 <Route path="/teams" element={<Home />} />
                 <Route path="/bookmarks" element={<Home />} />
