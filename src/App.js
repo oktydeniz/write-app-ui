@@ -9,6 +9,7 @@ import NotFound from 'screen/NotFound.js';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Contents from 'home/Contents';
 import ContentDetail from 'home/content/ContentDetail';
+import Notification from 'home/Notification';
 
 const App = () => {
  
@@ -31,7 +32,7 @@ const App = () => {
                 <Route path="/teams" element={<Home />} />
                 <Route path="/bookmarks" element={<Home />} />
                 <Route path="/messages" element={<Home />} />
-                <Route path="/notifications" element={<Home />} />
+                <Route path="/notifications" element={<Notification/>} />
                 <Route path="/account" element={<Home />} />
                 <Route path="/settings" element={<Home />} />
                 <Route path="/help" element={<Home />} />

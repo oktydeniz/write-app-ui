@@ -1,4 +1,4 @@
-import { getContentBySlug } from "network/ContentService";
+import { getContentBySlug, getNotes } from "network/ContentService";
 import React, { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
@@ -23,6 +23,8 @@ import AddSection from "home/content/AddSection";
 import Slide from "@mui/material/Slide";
 import { saveNewSectionData } from "network/SectionService";
 import FullScreenReader from "components/FullScreenReader";
+import Notes from "./Notes";
+import Authors from "./Authors";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -65,6 +67,7 @@ const ContentDetail = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = React.useState(0);
   const [switchStates, setSwitchStates] = useState({});
+  const [notes, setNotes] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
   const [combinedPassages, setCombinedPassages] = useState("");
   const handleChange = (event, newValue) => {
@@ -99,9 +102,27 @@ const ContentDetail = () => {
     
     fetchData();
     fetchSectionData();
+    fetchNotes();
   }, []);
 
+  const fetchNotes = async () => {
+    setNotes([]);
+    try {
+      const result = await getNotes(contentSlug);
+      if (result.success) {
+        setNotes(result.response);
+        console.log(result);
+      }else {
+        console.log(result);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
+  const handleRefresh = () => {
+    fetchNotes();
+  }
   const fetchSectionData = async () => {
     setPassages([]);
     setSwitchStates([]);
@@ -293,8 +314,12 @@ const ContentDetail = () => {
                 <AddIcon />
               </Fab>
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}></CustomTabPanel>
-            <CustomTabPanel value={value} index={2}></CustomTabPanel>
+            <CustomTabPanel value={value} index={1}>
+              <Notes notes={notes} content={content} trigger={handleRefresh}/>
+            </CustomTabPanel>
+            <CustomTabPanel value={value} index={2}>
+              <Authors content={content}/>
+            </CustomTabPanel>
             <CustomTabPanel value={value} index={3}></CustomTabPanel>
             <CustomTabPanel value={value} index={4}></CustomTabPanel>
             <CustomTabPanel value={value} index={5}></CustomTabPanel>
