@@ -41,11 +41,9 @@ const Authors = ({content}) => {
         invitee:authorId,
         inviter:getUserId()
     }
-    console.log(data);
     try {
         const result = await handleInvite(data);
         if (result.success) {
-            console.log(result);
         }
       } catch (error) {
         console.error(error);

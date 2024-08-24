@@ -28,7 +28,7 @@ export const saveNewContentData = async (endoint, content) => {
 export const getMyContents = async () => {
 
     try {
-        const response = await fetch(BASE_URL + '/content', {
+        const response = await fetch(BASE_URL + '/content/contents', {
           method: 'GET',
           headers: {
               'Authorization': `${getToken()}`,

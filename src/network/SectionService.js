@@ -16,7 +16,8 @@ export const saveNewSectionData = async (slug) => {
           throw new Error('Save failed');
         }
     
-        const data = await response.json();
+        const text = await response.text();
+        const data = JSON.parse(text); 
         return data;
       } catch (error) {
         console.error('Error:', error.message);

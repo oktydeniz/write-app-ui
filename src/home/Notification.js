@@ -1,4 +1,4 @@
-import { getInvitations } from "network/Notification";
+import { getInvitations,respondToInvitation } from "network/NotificationService";
 import React, { useEffect, useState } from "react";
 import { List, ListItem, ListItemText, Button, Box, Typography } from '@mui/material';
 
@@ -19,13 +19,16 @@ const Notification = () => {
 
   const handleResponse = async (inviteId, responseType) => {
     try {
-        console.log(inviteId, responseType);
-      //await respondToInvitation(inviteId, responseType);
       setInvitations((prevInvitations) =>
         prevInvitations.map((invite) =>
           invite.id === inviteId ? { ...invite, status: responseType } : invite
         )
       );
+      var data = {
+        inviteId,
+        responseType
+      }
+      await respondToInvitation(data);
     } catch (error) {
       console.error(`Error responding to invitation ${responseType}:`, error);
     }
@@ -46,7 +49,7 @@ const Notification = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => handleResponse(invite.id, 'ACCEPT')}
+              onClick={() => handleResponse(invite.id, 1)}
               disabled={invite.status !== 'PENDING'}
             >
               Kabul Et
@@ -54,7 +57,7 @@ const Notification = () => {
             <Button
               variant="outlined"
               color="secondary"
-              onClick={() => handleResponse(invite.id, 'REJECT')}
+              onClick={() => handleResponse(invite.id, 2)}
               disabled={invite.status !== 'PENDING'}
             >
               Reddet

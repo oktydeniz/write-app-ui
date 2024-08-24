@@ -41,7 +41,6 @@ export const register = async (formData) => {
       body: JSON.stringify(formData)
     });
     if (!response.ok) {
-      debugger;
       throw new Error('Register failed');
     }
     const data = await response.json();

@@ -111,9 +111,6 @@ const ContentDetail = () => {
       const result = await getNotes(contentSlug);
       if (result.success) {
         setNotes(result.response);
-        console.log(result);
-      }else {
-        console.log(result);
       }
     } catch (error) {
       console.error(error);
@@ -136,6 +133,7 @@ const ContentDetail = () => {
         }, {});
         setSwitchStates(initialSwitchStates);
         combinePassages(result.response);
+        
       }
     } catch (error) {
       console.error(error);

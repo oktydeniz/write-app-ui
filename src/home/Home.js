@@ -125,7 +125,6 @@ const Home = () => {
       }
 
       const data = await response.json();
-      console.log("File path:", data.filePath);
       var filePath = data.filePath;
       await fetch(PUBLIC_URL + "/v1/files/saveFilePath", {
         method: "POST",

@@ -149,7 +149,7 @@ const Notes = ({ notes, content, trigger }) => {
                 onChange={(e) => setShareWithAnotherAuth(e.target.checked)}
               />
             }
-            label="Share With Another Auth"
+            label="Publish with Readers"
           />
           <Button
             variant="contained"
