@@ -130,7 +130,7 @@ const Register = () => {
                                 onChange={handleInputPasswordVerifyChange}
                                 type="password" className="form-input pir100" required name="passwordVerify" id="passwordVerify"/>
                             </div>
-                            <div className="input-div">
+                            <div style={{display: 'none'}} className="input-div">
                             <label className="checkbox-label">
                                     <input
                                         type="checkbox"

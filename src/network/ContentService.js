@@ -94,6 +94,29 @@ export const getNotes = async (slug) => {
   }
 }
 
+export const getAuthors = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/authors/${req}`, {
+      method: 'GET',
+      headers: {
+          'Authorization': `${getToken()}`,
+          'Content-Type': 'application/json',
+          'Accept-Language': userLanguage
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Save failed');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error:', error.message);
+    throw error;
+  }
+}
+
 export const saveRequest = async (endoint, data) => {
   return saveNewContentData(endoint, data);
 }

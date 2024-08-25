@@ -232,7 +232,7 @@ const ContentDetail = () => {
                 <Tab label="Notes" {...a11yProps(1)} />
                 <Tab label="Authors" {...a11yProps(2)} />
                 <Tab label="Comments" {...a11yProps(3)} />
-                <Tab label="Settings" {...a11yProps(4)} />
+                <Tab label="Detail" {...a11yProps(4)} />
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>

@@ -20,7 +20,6 @@ const Contents = () => {
         const fetchData = async () => {
           try {
             const result = await getMyContents();
-            console.log(result);
             if (result.success) {
               setSharedWithMe(result.sharedWithMe);
               setContents(result.contents);
@@ -39,6 +38,7 @@ const Contents = () => {
     return (
         <>
         <div className="contents-container">
+          <>My Contents</>
         {contents.map((item) => (
             <Card onClick={() => handleCardClick(item.slug)} key={item.slug} className='content-card' sx={{ display: 'flex', maxWidth: 450,margin:'10px'}}>
             <CardMedia
@@ -89,6 +89,7 @@ const Contents = () => {
         </div>
         <br/>
         <div className="contents-container">
+        <>Shared With Me</>
         {sharedWithMe.map((item) => (
             <Card onClick={() => handleCardClick(item.slug)} key={item.slug} className='content-card' sx={{ display: 'flex', maxWidth: 450,margin:'10px'}}>
             <CardMedia
