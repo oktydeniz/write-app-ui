@@ -10,6 +10,7 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Contents from 'home/Contents';
 import ContentDetail from 'home/content/ContentDetail';
 import Notification from 'home/Notification';
+import Message from 'home/Message';
 
 const App = () => {
  
@@ -31,7 +32,7 @@ const App = () => {
                 <Route path="/activities" element={<Home />} />
                 <Route path="/publication" element={<Home />} />
                 <Route path="/bookmarks" element={<Home />} />
-                <Route path="/messages" element={<Home />} />
+                <Route path="/messages" element={<Message />} />
                 <Route path="/notifications" element={<Notification/>} />
                 <Route path="/account" element={<Home />} />
                 <Route path="/settings" element={<Home />} />

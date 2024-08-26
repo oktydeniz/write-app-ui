@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from 'react-router-dom';
-import { displayName } from "react-quill";
 
 const Sidebar = () => {
   const navigate = useNavigate();
