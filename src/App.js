@@ -11,6 +11,7 @@ import Contents from 'home/Contents';
 import ContentDetail from 'home/content/ContentDetail';
 import Notification from 'home/Notification';
 import Message from 'home/Message';
+import ContentsByTypes from 'home/content/ContentsByTypes';
 
 const App = () => {
  
@@ -28,6 +29,7 @@ const App = () => {
                 <Route index element={<Home />} />
                 <Route path="/home" element={<Home />} />
                 <Route path="/contents" element={<Contents />} />[
+                <Route path="/contents/:contentType" element={<ContentsByTypes />} />
                 <Route path="/content/:contentSlug" element={<ContentDetail />} />]
                 <Route path="/activities" element={<Home />} />
                 <Route path="/publication" element={<Home />} />

@@ -184,7 +184,7 @@ const ContentDetail = () => {
               <Grid item={true} content="true" xs={12} sx={{ padding: 2 }}>
                 <Grid container justifyContent="space-between">
                   <Typography variant="body2" color="text.secondary">
-                    {`${content.genre.name} - ${content.clickedCount} clicks`}
+                    {`${content.genre.label} - ${content.clickedCount} clicks`}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {content.price
@@ -203,7 +203,7 @@ const ContentDetail = () => {
                   {content.tags.map((tag, index) => (
                     <Chip
                       sx={{ margin: "3px" }}
-                      label={tag.name}
+                      label={tag.label}
                       key={index}
                       size="small"
                     />

@@ -9,21 +9,19 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
+import Select from "react-select";
 import TextField from "@mui/material/TextField";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 import { sendGETRequestWithToken } from "network/PublicService";
 import { Input, Box } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { PUBLIC_URL } from "network/Constant";
-import { Checkbox, ListItemText } from "@mui/material";
-import { saveNewContentData } from "network/ContentService";
+import { getSubGenres, saveNewContentData } from "network/ContentService";
 import { useNavigate } from "react-router-dom";
+import { convertToNumber } from "utils/StringUtil";
+import { currencies, languages } from "utils/data";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -31,60 +29,33 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 const Home = () => {
   const navigate = useNavigate();
-  const currencies = [
-    {
-      value: 0,
-      label: "USD - US Dollar - $",
-    },
-    {
-      value: 2,
-      label: "EUR - Euro - €",
-    },
-    {
-      value: 1,
-      label: " TRY - Turkish Lira - ₺",
-    },
-  ];
-
-  const [contents, setContents] = useState([]); // Array to store fetched genres
-  const [selectedValue, setSelectedValue] = useState(""); // State for the selected value in Select
-  const [selectedTagValue, setSelectedTagValue] = useState("");
+  const [contents, setContents] = useState([]);
+  const [selectedValue, setSelectedValue] = useState("");
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [about, setAbout] = useState("");
   const [isChecked, setIsChecked] = useState(true);
   const [priceInput, setPriceInput] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState();
   const [selectedCurrent, setSelectedCurrent] = useState(currencies[0].value);
+  const [errorText, setErrorText] = useState(null);
 
   const handleSwitchChange = (event) => {
     setIsChecked(event.target.checked);
-  };
-
-  const handleChangeTags = (event) => {
-    setSelectedTags(event.target.value);
-    handleTagChange(event);
   };
 
   const handlePriceInput = (event) => {
     setPriceInput(event.target.value);
   };
 
-  const handleChange = (event) => {
-    setSelectedValue(event.target.value);
-  };
-
   const handleAbout = (event) => {
     setAbout(event.target.value);
   };
 
-  const handleCurrency = (event) => {
-    setSelectedCurrent(event.target.value);
-  };
-
-  const handleTagChange = (event) => {
-    setSelectedTagValue(event.target.value);
+  const handleCurrency = (data) => {
+    setSelectedCurrent(data.value);
   };
 
   const handleName = (event) => {
@@ -109,7 +80,10 @@ const Home = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file) {
+      setErrorText("You need to add a Cover İmage");
+      return;
+    };
 
     const formData = new FormData();
     formData.append("file", file);
@@ -139,15 +113,8 @@ const Home = () => {
     saveContent(filePath);
   };
 
-  const convertToNumber = (priceInput) => {
-    // Replace commas with periods
-    const normalizedInput = priceInput.replace(",", ".");
-    // Convert to number
-    const price = Number(normalizedInput);
-    return isNaN(price) ? null : price;
-  };
-
   const saveContent = async (file) => {
+    setErrorText(null);
     var data = {
       name: name,
       coverUrl: file,
@@ -155,13 +122,16 @@ const Home = () => {
       price: convertToNumber(priceInput),
       currency: selectedCurrent,
       contentTypeId: selectedValue,
-      tags: selectedTagValue,
+      tags: selectedTags,
       isFree: isChecked,
+      language: selectedLanguage,
     };
     try {
       const result = await saveNewContentData("/content", data);
       if (result.success) {
         navigate("/contents");
+      } else {
+        setErrorText(result.message);
       }
     } catch (error) {
       console.error(error);
@@ -174,7 +144,6 @@ const Home = () => {
         const result = await sendGETRequestWithToken("/v1/public/genres-type");
         if (result.success) {
           setContents(result.response);
-
           if (result.response.length > 0) {
             setSelectedValue(result.response[0].id);
           }
@@ -183,23 +152,33 @@ const Home = () => {
         console.error(error);
       }
     };
-    const fetchTagData = async () => {
-      try {
-        const result = await sendGETRequestWithToken("/v1/public/genres-tags");
-        if (result.success) {
-          setTags(result.response);
-
-          if (result.response.length > 0) {
-            setSelectedTagValue(result.response[0].id);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
     fetchData();
-    fetchTagData();
   }, []);
+
+  const fetchTagData = async (id) => {
+    setTags([]);
+    setSelectedTags([]);
+    try {
+      const result = await getSubGenres(id);
+      if (result.success) {
+        setTags(result.response);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleChangeForGenre = (selectedOption) => {
+    setSelectedValue(selectedOption.value);
+    fetchTagData(selectedOption.value);
+  };
+  const handleChangeForTags = (selectedOption) => {
+    setSelectedTags(selectedOption.map((item) => item.value));
+  };
+
+  const handleChangeForLanguage = (value) => {
+    setSelectedLanguage(value.value);
+  };
 
   return (
     <div>
@@ -236,158 +215,210 @@ const Home = () => {
             </Button>
           </Toolbar>
         </AppBar>
-        <TextField
-          onChange={handleName}
-          fullWidth
-          value={name}
-          label="Name"
-          id="name"
-        />
-        <FormGroup>
-          <TextField
-            id="outlined-multiline-static"
-            label="About"
-            multiline
-            value={about}
-            onChange={handleAbout}
-            rows={4}
-          />
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "justify-start",
-              padding: "10px",
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Switch checked={isChecked} onChange={handleSwitchChange} />
-              }
-              label="Free"
+        <div className="create-content">
+          <Box className="select-img-container" sx={{ padding: 2 }}>
+            <Input
+              accept="image/*"
+              id="file-input"
+              type="file"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
             />
-            {!isChecked && (
-              <>
-                {" "}
-                <TextField
-                  onChange={handlePriceInput}
-                  value={priceInput}
-                  label="Price"
-                  variant="outlined"
-                  sx={{
-                    width: "200px",
-                  }}
+
+            {imageSrc && (
+              <Box
+                sx={{
+                  marginTop: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  overflow: "hidden",
+                  maxWidth: 250,
+                  borderRadius: "12px",
+                  maxHeight: 450,
+                }}
+              >
+                <img
+                  src={imageSrc}
+                  alt="Selected"
+                  style={{ width: "100%", height: "250px" }}
                 />
-                <FormControl>
-                  <InputLabel id="Currency-select-label">Currency</InputLabel>
-                  <Select
-                    labelId="Currency-select-label"
-                    id="currency-select"
-                    value={selectedCurrent}
-                    label="Content Type"
-                    onChange={handleCurrency}
-                  >
-                    {currencies.map((item) => (
-                      <MenuItem key={item.value} value={item.value}>
-                        {item.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </>
+              </Box>
             )}
+            <label htmlFor="file-input">
+              <Button
+                variant="contained"
+                component="span"
+                startIcon={<AttachFileIcon />}
+              >
+                Select Image
+              </Button>
+            </label>
           </Box>
-        </FormGroup>
-        <FormControl fullWidth>
-          <InputLabel id="demo-simple-select-label">Content Type</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={selectedValue}
-            label="Content Type"
-            onChange={handleChange}
-          >
-            {contents.map((item) => (
-              <MenuItem key={item.id} value={item.id}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl fullWidth>
-          <InputLabel id="tags-select-label">Tag</InputLabel>
-          <Select
-            labelId="tags-select-label"
-            id="tags-select"
-            multiple
-            value={selectedTags}
-            onChange={handleChangeTags}
-            renderValue={(selected) => (
+          <div className="content-names-container">
+            {errorText != null && (
+              <Typography variant="body2" color="red" sx={{fontSize:'15px', margin:'10px'}}>
+                {errorText}
+              </Typography>
+            )}
+            <TextField
+              className="name"
+              onChange={handleName}
+              fullWidth
+              value={name}
+              label="Name"
+              id="name"
+            />
+            <TextField
+              id="about"
+              label="About"
+              multiline
+              fullWidth
+              value={about}
+              onChange={handleAbout}
+              rows={6}
+            />
+            <FormGroup>
               <Box
                 sx={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 1,
-                  maxHeight: 200,
-                  overflowY: "auto",
+                  justifyContent: "justify-start",
+                  padding: "10px",
                 }}
               >
-                {selected.map((value) => {
-                  const tag = tags.find((tag) => tag.id === value);
-                  return tag ? <Box key={value}>{tag.name}</Box> : null;
-                })}
+                <FormControlLabel
+                  control={
+                    <Switch checked={isChecked} onChange={handleSwitchChange} />
+                  }
+                  label="Free"
+                />
+                {!isChecked && (
+                  <>
+                    <TextField
+                      onChange={handlePriceInput}
+                      value={priceInput}
+                      label="Price"
+                      variant="outlined"
+                      sx={{
+                        width: "200px",
+                        marginRight: "10px",
+                      }}
+                    />
+                    <Select
+                      className="basic-single"
+                      classNamePrefix="select"
+                      defaultValue={currencies[0]}
+                      isClearable={true}
+                      isSearchable={true}
+                      onChange={handleCurrency}
+                      options={currencies}
+                      name="currency"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          height: "55px",
+                          minHeight: "55px",
+                        }),
+                        valueContainer: (provided) => ({
+                          ...provided,
+                          height: "55px",
+                          display: "flex",
+                          alignItems: "center",
+                        }),
+                      }}
+                    />
+                  </>
+                )}
               </Box>
-            )}
-            sx={{
-              maxHeight: 300, // Adjust height of the dropdown
-              overflowY: "auto", // Enable scrolling if content overflows
-            }}
-          >
-            {tags.map((item) => (
-              <MenuItem key={item.id} value={item.id}>
-                <Checkbox checked={selectedTags.indexOf(item.id) > -1} />
-                <ListItemText primary={item.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Box sx={{ padding: 2 }}>
-          <Input
-            accept="image/*"
-            id="file-input"
-            type="file"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-          />
-          <label htmlFor="file-input">
-            <Button
-              variant="contained"
-              component="span"
-              startIcon={<AttachFileIcon />}
-            >
-              Select Image
-            </Button>
-          </label>
-          {imageSrc && (
-            <Box
-              sx={{
-                marginTop: 2,
-                display: "flex",
-                justifyContent: "center",
-                border: "1px solid #ddd",
-                borderRadius: 1,
-                overflow: "hidden",
-                maxWidth: 300,
-                maxHeight: 450,
+            </FormGroup>
+          </div>
+        </div>
+        <div className="selects">
+          <div className="select-item">
+            <div className="item-span">Category</div>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              defaultValue={contents[0]}
+              isClearable={true}
+              isSearchable={true}
+              onChange={handleChangeForGenre}
+              options={contents}
+              name=".contents"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  minHeight: "55px",
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  display: "flex",
+                  alignItems: "center",
+                }),
               }}
-            >
-              <img
-                src={imageSrc}
-                alt="Selected"
-                style={{ width: "100%", height: "auto" }}
+            />
+          </div>
+          <br />
+          {tags.length > 0 && (
+            <div className="select-item">
+              <div className="item-span">Tags</div>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                isClearable={true}
+                isMulti
+                isSearchable={true}
+                closeMenuOnSelect={false}
+                onChange={handleChangeForTags}
+                options={tags}
+                name="tags"
+                styles={{
+                  control: (provided) => ({
+                    ...provided,
+                    height: "55px",
+                    minHeight: "55px",
+                  }),
+                  valueContainer: (provided) => ({
+                    ...provided,
+                    height: "55px",
+                    display: "flex",
+                    alignItems: "center",
+                  }),
+                }}
               />
-            </Box>
+            </div>
           )}
-        </Box>
+          <br />
+          <div className="select-item">
+            <div className="item-span">Language</div>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              defaultValue={languages[0]}
+              isClearable={true}
+              isSearchable={true}
+              onChange={handleChangeForLanguage}
+              options={languages}
+              name=".contents"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  minHeight: "55px",
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  display: "flex",
+                  alignItems: "center",
+                }),
+              }}
+            />
+          </div>
+        </div>
         <Button
           variant="contained"
           color="primary"

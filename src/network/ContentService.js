@@ -1,4 +1,4 @@
-import { BASE_URL, getToken, userLanguage } from "./Constant";
+import { BASE_URL, getToken, PUBLIC_URL, userLanguage } from "./Constant";
 
 export const saveNewContentData = async (endoint, content) => {
   try {
@@ -11,15 +11,12 @@ export const saveNewContentData = async (endoint, content) => {
       },
       body: JSON.stringify(content),
     });
-
-    if (!response.ok) {
-      throw new Error("Save failed");
-    }
-
     const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message || "Save failed" };
+    }
     return data;
   } catch (error) {
-    console.error("Error:", error.message);
     throw error;
   }
 };
@@ -114,4 +111,51 @@ export const getAuthors = async (req) => {
 
 export const saveRequest = async (endoint, data) => {
   return saveNewContentData(endoint, data);
+};
+
+
+export const getSubGenres = async (id) => {
+  try {
+    const response = await fetch(`${PUBLIC_URL}/v1/public/genres-subs/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+
+
+export const getUserContentsByType = async (contentType) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/find?type=${contentType}`, {
+      method: "GET",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
 };
