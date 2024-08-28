@@ -25,6 +25,8 @@ import { saveNewSectionData } from "network/SectionService";
 import FullScreenReader from "components/FullScreenReader";
 import Notes from "./Notes";
 import Authors from "./Authors";
+import AddContent from "./AddContent";
+import ContentMoreOptions from "./ContentMoreOptions";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -65,6 +67,7 @@ const ContentDetail = () => {
   const [passages, setPassages] = useState([]);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [openContentdialog, setContentDialog] = useState(false);
   const [value, setValue] = React.useState(0);
   const [switchStates, setSwitchStates] = useState({});
   const [notes, setNotes] = useState([]);
@@ -88,18 +91,18 @@ const ContentDetail = () => {
   const handleChangeSection = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getContentBySlug(contentSlug);
-        if (result.success) {
-          setContent(result.response);
-        }
-      } catch (error) {
-        console.error(error);
+
+  const fetchData = async () => {
+    try {
+      const result = await getContentBySlug(contentSlug);
+      if (result.success) {
+        setContent(result.response);
       }
-    };
-    
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
     fetchData();
     fetchSectionData();
     fetchNotes();
@@ -168,6 +171,17 @@ const ContentDetail = () => {
   const handleCloseReader = () => {
     setShowReader(false);
   };
+  const handleClickOpenContent = () => {
+    setContentDialog(true);
+  };
+
+  const handleCloseContent = () => {
+    setContentDialog(false);
+  };
+  const actionHandler = () => {
+    fetchData();
+    handleCloseContent();
+  }
   
   return (
     <div className="content-detail">
@@ -186,11 +200,9 @@ const ContentDetail = () => {
                   <Typography variant="body2" color="text.secondary">
                     {`${content.genre.label} - ${content.clickedCount} clicks`}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {content.price
-                      ? `${content.price} ${content.currency} `
-                      : "Free"}
-                  </Typography>
+                  <Button  onClick={handleClickOpenContent} variant="body2" color="text.secondary">
+                    Edit
+                  </Button>
                 </Grid>
                 <Typography variant="h6" component="div">
                   {content.name}
@@ -221,6 +233,7 @@ const ContentDetail = () => {
               </Grid>
             </Grid>
           </Card>
+          <AddContent open={openContentdialog}  handleClose={handleCloseContent} actionHandler={actionHandler} content={content}/>
           <Box sx={{ width: "100%" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs
@@ -232,7 +245,7 @@ const ContentDetail = () => {
                 <Tab label="Notes" {...a11yProps(1)} />
                 <Tab label="Authors" {...a11yProps(2)} />
                 <Tab label="Comments" {...a11yProps(3)} />
-                <Tab label="Detail" {...a11yProps(4)} />
+                <Tab label="More" {...a11yProps(4)} />
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -301,7 +314,9 @@ const ContentDetail = () => {
                     </Accordion>
                   ))}
                 </>
-              ) : null}
+              ) : <p className="no-data-p">
+                You Have not created a section for {content.name}. <span style={{cursor:'pointer'}} onClick={handleClickOpen}>Click Here or Plus Button to create new section</span>
+              </p>}
               <Fab
                 className="floating-btn"
                 onClick={handleClickOpen}
@@ -319,8 +334,9 @@ const ContentDetail = () => {
               <Authors content={content}/>
             </CustomTabPanel>
             <CustomTabPanel value={value} index={3}></CustomTabPanel>
-            <CustomTabPanel value={value} index={4}></CustomTabPanel>
-            <CustomTabPanel value={value} index={5}></CustomTabPanel>
+            <CustomTabPanel value={value} index={4}>
+              <ContentMoreOptions content={content} />
+            </CustomTabPanel>
           </Box>
           {open ? (
             <AddSection open={open} content={content} onClose={handleClose} />

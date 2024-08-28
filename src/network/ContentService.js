@@ -21,6 +21,27 @@ export const saveNewContentData = async (endoint, content) => {
   }
 };
 
+export const editNewContentData = async (content) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/edit`, {
+      method: "POST",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(content),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, message: data.message || "Edit failed" };
+    }
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getMyContents = async () => {
   try {
     const response = await fetch(BASE_URL + "/content/contents", {
@@ -136,7 +157,28 @@ export const getSubGenres = async (id) => {
   }
 };
 
+export const updateContentStatus =  async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/publish`, {
+      method: "POST",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req)
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
 
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}
 
 export const getUserContentsByType = async (contentType) => {
   try {
@@ -159,3 +201,27 @@ export const getUserContentsByType = async (contentType) => {
     throw error;
   }
 };
+
+
+export const deleteContent  = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body:JSON.stringify(req)
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}

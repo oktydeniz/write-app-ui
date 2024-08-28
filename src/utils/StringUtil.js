@@ -6,7 +6,12 @@ export function truncateText(text, maxLength) {
 }
 
 export const convertToNumber = (priceInput) => {
+  if (typeof priceInput !== 'string') {
+    return isNaN(priceInput) ? null : Number(priceInput);
+  }
+  
   const normalizedInput = priceInput.replace(",", ".");
   const price = Number(normalizedInput);
-  return isNaN(price) ? null : price;
+  
+  return isNaN(price) ? 0 : price;
 };

@@ -9,7 +9,7 @@ export const currencies = [
   },
   {
     value: 1,
-    label: " TRY - Turkish Lira - ₺",
+    label: "TRY - Turkish Lira - ₺",
   },
 ];
 
@@ -39,3 +39,15 @@ export const languages = [
       label: "Русский",
     },
   ];
+
+
+export function getCurrency(str){
+
+  if (str === "USD"){
+    return 0;
+  }else if (str === "TRY"){
+    return 1;
+  }else {
+    return 2;
+  }
+}

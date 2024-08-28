@@ -18,29 +18,63 @@ import { sendGETRequestWithToken } from "network/PublicService";
 import { Input, Box } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { PUBLIC_URL } from "network/Constant";
-import { getSubGenres, saveNewContentData } from "network/ContentService";
+import { getSubGenres, editNewContentData } from "network/ContentService";
 import { useNavigate } from "react-router-dom";
 import { convertToNumber } from "utils/StringUtil";
-import { currencies, languages } from "utils/data";
+import { currencies, languages, getCurrency } from "utils/data";
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
-const Home = () => {
+
+const AddContent = ({open,handleClose, actionHandler, content}) => {
   const navigate = useNavigate();
   const [contents, setContents] = useState([]);
-  const [selectedValue, setSelectedValue] = useState("");
-  const [name, setName] = useState("");
-  const [tags, setTags] = useState([]);
+  const [selectedValue, setSelectedValue] = useState();
+  const [name, setName] = useState(content.name);
+  const [tags, setTags] = useState(content.tags);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [open, setOpen] = useState(true);
-  const [about, setAbout] = useState("");
-  const [isChecked, setIsChecked] = useState(true);
-  const [priceInput, setPriceInput] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState();
-  const [selectedCurrent, setSelectedCurrent] = useState(currencies[0].value);
+  const [about, setAbout] = useState(content.description);
+  const [isChecked, setIsChecked] = useState((content.price == null || content.price <=0));
+  const [priceInput, setPriceInput] = useState(content.price);
+  const [selectedLanguage, setSelectedLanguage] = useState(languages.find(l => l.value === content.language));
+  const [selectedCurrent, setSelectedCurrent] = useState(currencies.find(currency => currency.value == getCurrency(content.currency)));
   const [errorText, setErrorText] = useState(null);
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await sendGETRequestWithToken("/v1/public/genres-type");
+        if (result.success) {
+          setContents(result.response);
+          if (result.response.length > 0) {
+            const selectedOption = result.response.find(
+              (genre) => genre.value === content.genre.value
+            );
+            setSelectedValue(selectedOption);
+            fetchTagData(content.genre.value, content.tags);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const fetchTagData = async (id, contentTags) => {
+    setTags([]);
+    setSelectedTags([]);
+    try {
+      const result = await getSubGenres(id);
+      if (result.success) {
+        setTags(result.response);
+        setSelectedTags(contentTags);
+        
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSwitchChange = (event) => {
     setIsChecked(event.target.checked);
@@ -62,113 +96,6 @@ const Home = () => {
     setName(event.target.value);
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const [imageSrc, setImageSrc] = useState(null);
-  const [file, setFile] = useState(null);
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setFile(file);
-      setImageSrc(URL.createObjectURL(file));
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!file) {
-      setErrorText("You need to add a Cover İmage");
-      return;
-    };
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(PUBLIC_URL + "/v1/files/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const data = await response.json();
-      var filePath = data.filePath;
-      await fetch(PUBLIC_URL + "/v1/files/saveFilePath", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ filePath: data.filePath }),
-      });
-    } catch (error) {
-      console.error("Error:", error);
-    }
-    saveContent(filePath);
-  };
-
-  const saveContent = async (file) => {
-    setErrorText(null);
-    var data = {
-      name: name,
-      coverUrl: file,
-      about: about,
-      price: convertToNumber(priceInput),
-      currency: selectedCurrent,
-      contentTypeId: selectedValue,
-      tags: selectedTags,
-      isFree: isChecked,
-      language: selectedLanguage,
-    };
-    try {
-      const result = await saveNewContentData("/content", data);
-      if (result.success) {
-        setOpen(false);
-        navigate("/contents");
-      } else {
-        setErrorText(result.message);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await sendGETRequestWithToken("/v1/public/genres-type");
-        if (result.success) {
-          setContents(result.response);
-          if (result.response.length > 0) {
-            setSelectedValue(result.response[0].id);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const fetchTagData = async (id) => {
-    setTags([]);
-    setSelectedTags([]);
-    try {
-      const result = await getSubGenres(id);
-      if (result.success) {
-        setTags(result.response);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const handleChangeForGenre = (selectedOption) => {
     setSelectedValue(selectedOption.value);
     fetchTagData(selectedOption.value);
@@ -184,18 +111,85 @@ const Home = () => {
       setSelectedLanguage("EN");
     }
   };
+  const [imageSrc, setImageSrc] = useState(content.img);
+  const [file, setFile] = useState(null);
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFile(file);
+      setImageSrc(URL.createObjectURL(file));
+    }
+  };
 
+  const handleUpload = async () => {
+    if (!file && !content.img) {
+      setErrorText("You need to add a Cover İmage");
+      return;
+    };
+    if(file){
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      try {
+        const response = await fetch(PUBLIC_URL + "/v1/files/upload", {
+          method: "POST",
+          body: formData,
+        });
+  
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+  
+        const data = await response.json();
+        var filePath = data.filePath;
+        await fetch(PUBLIC_URL + "/v1/files/saveFilePath", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ filePath: data.filePath }),
+        });
+      } catch (error) {
+        console.error("Error:", error);
+      }
+      saveContent(filePath);
+    }else {
+      saveContent(content.img);
+    }
+    
+  };
+  const checkValue =(field) => {
+    return field.value ? field.value : field ;
+  }
+
+  const saveContent = async (file) => {
+    setErrorText(null);
+    var data = {
+      name: name,
+      contentId:content.id,
+      coverUrl: file,
+      about: about,
+      price: convertToNumber(priceInput),
+      currency: checkValue(selectedCurrent),
+      contentTypeId: checkValue(selectedValue) ,
+      tags: selectedTags.map(tag => checkValue(tag)),
+      isFree: isChecked,
+      language: checkValue(selectedLanguage)
+    };
+    console.log(data);
+    try {
+      const result = await editNewContentData(data);
+      if (result.success) {
+        actionHandler();
+      } else {
+        setErrorText(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div>
-      <Fab
-        className="floating-btn"
-        onClick={handleClickOpen}
-        size="small"
-        color="primary"
-        aria-label="add"
-      >
-        <AddIcon />
-      </Fab>
       <Dialog
         fullScreen
         open={open}
@@ -313,7 +307,7 @@ const Home = () => {
                     <Select
                       className="basic-single"
                       classNamePrefix="select"
-                      defaultValue={currencies[0]}
+                      defaultValue={selectedCurrent}
                       isClearable={true}
                       isSearchable={true}
                       onChange={handleCurrency}
@@ -345,7 +339,7 @@ const Home = () => {
             <Select
               className="basic-single"
               classNamePrefix="select"
-              defaultValue={contents[0]}
+              defaultValue={selectedValue}
               isClearable={true}
               isSearchable={true}
               onChange={handleChangeForGenre}
@@ -375,6 +369,7 @@ const Home = () => {
                 classNamePrefix="select"
                 isClearable={true}
                 isMulti
+                defaultValue={selectedTags}
                 isSearchable={true}
                 closeMenuOnSelect={false}
                 onChange={handleChangeForTags}
@@ -402,7 +397,7 @@ const Home = () => {
             <Select
               className="basic-single"
               classNamePrefix="select"
-              defaultValue={languages[0]}
+              defaultValue={selectedLanguage}
               isClearable={true}
               isSearchable={true}
               onChange={handleChangeForLanguage}
@@ -429,4 +424,9 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default AddContent;
+
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
