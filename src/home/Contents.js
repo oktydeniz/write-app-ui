@@ -1,10 +1,7 @@
 import { getMyContents } from "network/ContentService";
 import React, { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
 import { Grid, Chip, Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import "assets/style/main.scss";
@@ -36,13 +33,19 @@ const Contents = () => {
   const showAll = (type) => {
     var section = type === 0 ? "my-contents" : "shared-with-me";
     navigate(`/contents/${section}`);
-  }
+  };
 
   return (
     <>
       <div className="contents-container">
-        <span>My Contents</span>
-        <span onClick={()=>showAll(0)} className="show-all">Show All</span>
+        {contents.length > 0 ? (
+          <>
+            <span>My Contents</span>
+            <span onClick={() => showAll(0)} className="show-all">
+              Show All
+            </span>
+          </>
+        ) : null}
         <Box className="contents-lists">
           {contents.map((item) => (
             <Card
@@ -59,7 +62,7 @@ const Contents = () => {
             >
               <CardMedia
                 component="img"
-                sx={{ width: 140, height: "200px;", borderRadius:'10px;'}}
+                sx={{ width: 140, height: "200px;", borderRadius: "10px;" }}
                 image={item.img}
                 alt={item.name}
               />
@@ -116,8 +119,14 @@ const Contents = () => {
       </div>
       <br />
       <div className="contents-container">
-        <span>Shared With Me</span>
-        <span onClick={()=>showAll(1)} className="show-all">Show All</span>
+        {sharedWithMe.length > 0 ? (
+          <>
+            <span>Shared With Me</span>
+            <span onClick={() => showAll(1)} className="show-all">
+              Show All
+            </span>
+          </>
+        ) : null}
         <Box className="contents-lists">
           {sharedWithMe.map((item) => (
             <Card
@@ -134,7 +143,7 @@ const Contents = () => {
             >
               <CardMedia
                 component="img"
-                sx={{ width: 140, height: "200px;", borderRadius:'10px;' }}
+                sx={{ width: 140, height: "200px;", borderRadius: "10px;" }}
                 image={item.img}
                 alt={item.name}
               />
@@ -159,7 +168,7 @@ const Contents = () => {
                     {item.tags.slice(0, 3).map((tag, index) => (
                       <Chip
                         sx={{ margin: "3px" }}
-                        label={tag.name}
+                        label={tag.label}
                         key={index}
                         size="small"
                       />

@@ -307,3 +307,17 @@ input:focus {
 
   }
 }
+
+.searc-input{
+  width: 90%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid gray;
+  padding: 12px;
+}
+
+.author-list {
+  display: flex;
+  flex-direction: column;
+
+}

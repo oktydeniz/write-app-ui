@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import AppBar from "@mui/material/AppBar";
@@ -23,9 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { convertToNumber } from "utils/StringUtil";
 import { currencies, languages, getCurrency } from "utils/data";
 
-
-
-const AddContent = ({open,handleClose, actionHandler, content}) => {
+const AddContent = ({ open, handleClose, actionHandler, content }) => {
   const navigate = useNavigate();
   const [contents, setContents] = useState([]);
   const [selectedValue, setSelectedValue] = useState();
@@ -33,12 +29,19 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
   const [tags, setTags] = useState(content.tags);
   const [selectedTags, setSelectedTags] = useState([]);
   const [about, setAbout] = useState(content.description);
-  const [isChecked, setIsChecked] = useState((content.price == null || content.price <=0));
+  const [isChecked, setIsChecked] = useState(
+    content.price == null || content.price <= 0
+  );
   const [priceInput, setPriceInput] = useState(content.price);
-  const [selectedLanguage, setSelectedLanguage] = useState(languages.find(l => l.value === content.language));
-  const [selectedCurrent, setSelectedCurrent] = useState(currencies.find(currency => currency.value == getCurrency(content.currency)));
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    languages.find((l) => l.value === content.language)
+  );
+  const [selectedCurrent, setSelectedCurrent] = useState(
+    currencies.find(
+      (currency) => currency.value == getCurrency(content.currency)
+    )
+  );
   const [errorText, setErrorText] = useState(null);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,7 +72,6 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
       if (result.success) {
         setTags(result.response);
         setSelectedTags(contentTags);
-        
       }
     } catch (error) {
       console.error(error);
@@ -105,9 +107,9 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
   };
 
   const handleChangeForLanguage = (value) => {
-    if(value){
+    if (value) {
       setSelectedLanguage(value.value);
-    }else {
+    } else {
       setSelectedLanguage("EN");
     }
   };
@@ -125,21 +127,21 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
     if (!file && !content.img) {
       setErrorText("You need to add a Cover İmage");
       return;
-    };
-    if(file){
+    }
+    if (file) {
       const formData = new FormData();
       formData.append("file", file);
-  
+
       try {
         const response = await fetch(PUBLIC_URL + "/v1/files/upload", {
           method: "POST",
           body: formData,
         });
-  
+
         if (!response.ok) {
           throw new Error("Upload failed");
         }
-  
+
         const data = await response.json();
         var filePath = data.filePath;
         await fetch(PUBLIC_URL + "/v1/files/saveFilePath", {
@@ -153,30 +155,28 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
         console.error("Error:", error);
       }
       saveContent(filePath);
-    }else {
+    } else {
       saveContent(content.img);
     }
-    
   };
-  const checkValue =(field) => {
-    return field.value ? field.value : field ;
-  }
+  const checkValue = (field) => {
+    return field.hasOwnProperty("value") ? field.value : field;
+  };
 
   const saveContent = async (file) => {
     setErrorText(null);
     var data = {
       name: name,
-      contentId:content.id,
+      contentId: content.id,
       coverUrl: file,
       about: about,
       price: convertToNumber(priceInput),
       currency: checkValue(selectedCurrent),
-      contentTypeId: checkValue(selectedValue) ,
-      tags: selectedTags.map(tag => checkValue(tag)),
+      contentTypeId: checkValue(selectedValue),
+      tags: selectedTags.map((tag) => checkValue(tag)),
       isFree: isChecked,
-      language: checkValue(selectedLanguage)
+      language: checkValue(selectedLanguage),
     };
-    console.log(data);
     try {
       const result = await editNewContentData(data);
       if (result.success) {
@@ -257,7 +257,11 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
           </Box>
           <div className="content-names-container">
             {errorText != null && (
-              <Typography variant="body2" color="red" sx={{fontSize:'15px', margin:'10px'}}>
+              <Typography
+                variant="body2"
+                color="red"
+                sx={{ fontSize: "15px", margin: "10px" }}
+              >
                 {errorText}
               </Typography>
             )}
@@ -426,7 +430,6 @@ const AddContent = ({open,handleClose, actionHandler, content}) => {
 
 export default AddContent;
 
-
 const Transition = React.forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
+  return <Slide direction="up" ref={ref} {...props} />;
+});

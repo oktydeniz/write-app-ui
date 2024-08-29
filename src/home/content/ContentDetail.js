@@ -27,7 +27,7 @@ import Notes from "./Notes";
 import Authors from "./Authors";
 import AddContent from "./AddContent";
 import ContentMoreOptions from "./ContentMoreOptions";
-
+import { truncateText } from "utils/StringUtil";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -208,7 +208,7 @@ const ContentDetail = () => {
                   {content.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {content.description}
+                  {truncateText(content.description,400)}
                 </Typography>
 
                 <Grid container spacing={1} sx={{ marginTop: 1 }}>

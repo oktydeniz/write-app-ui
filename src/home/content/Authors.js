@@ -6,13 +6,13 @@ import {
   ListItemAvatar,
   Avatar,
   ListItemText,
+  Box,
   Button,
   IconButton,
 } from "@mui/material";
 import { getUserId } from "network/Constant";
 import { ArrowForwardIos } from "@mui/icons-material";
 import { getAuthors } from "network/ContentService";
-
 const Authors = ({ content }) => {
   const [query, setQuery] = useState("");
   const [authors, setAuthors] = useState([]);
@@ -35,7 +35,7 @@ const Authors = ({ content }) => {
         setUsers([]);
       }
     };
-    fetchAuthors()
+    fetchAuthors();
     const timeoutId = setTimeout(() => {
       fetchUsers();
     }, 500);
@@ -43,9 +43,7 @@ const Authors = ({ content }) => {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  useEffect(()=>{
-    
-  },[]);
+  useEffect(() => {}, []);
 
   const fetchAuthors = async () => {
     try {
@@ -64,8 +62,8 @@ const Authors = ({ content }) => {
     };
     try {
       const result = await handleInvite(data);
-      if (result.success) {
-      }
+      setQuery("");
+      setUsers([]);
     } catch (error) {
       console.error(error);
     }
@@ -73,24 +71,29 @@ const Authors = ({ content }) => {
 
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Search for authors..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      {loading && <p>Loading...</p>}
-      <List>
-        {users.map((user) => (
-          <AuthorListItem
-            key={user.id}
-            user={user}
-            onInvite={handleInviteAction}
+      { Number(getUserId()) === content.createdBy.id &&
+        <Box>
+          <input
+            className="searc-input"
+            type="text"
+            placeholder="Search for authors..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
-        ))}
-      </List>
-      <div>
-        <h4>Authors</h4>
+          {loading && <p>Loading...</p>}
+          <List>
+            {users.map((user) => (
+              <AuthorListItem
+                key={user.id}
+                user={user}
+                onInvite={handleInviteAction}
+              />
+            ))}
+          </List>
+        </Box>
+      }
+      <h4>Authors</h4>
+      <div className="author-list">
         <AuthorList authors={authors} />
       </div>
     </div>
@@ -115,7 +118,10 @@ const AuthorListItem = ({ user, onInvite }) => {
       <ListItemAvatar>
         <Avatar alt={user.userName} src={user.avatarUrl} />
       </ListItemAvatar>
-      <ListItemText primary={user.userName} secondary={user.userAppName} />
+      <ListItemText
+        primary={user.userName}
+        secondary={`@${user.userAppName}`}
+      />
     </ListItem>
   );
 };
@@ -126,15 +132,27 @@ const AuthorList = ({ authors }) => {
   return (
     <List>
       {sortedAuthors.map((author) => (
-        <ListItem key={author.user.id}  sx={{
-          backgroundColor: author.role === 'OWNER' ? 'rgba(0, 0, 0, 0.1)' : 'inherit',
-          borderRadius: 1, 
-        }}>
+        <ListItem
+          key={author.user.id}
+          sx={{
+            backgroundColor:
+              author.role === "OWNER" ? "rgba(0, 0, 0, 0.1)" : "inherit",
+            borderRadius: 1,
+          }}
+        >
           <ListItemAvatar>
             <Avatar src={author.user.userAvatar} alt={author.user.userName} />
           </ListItemAvatar>
           <ListItemText
-            primary={localUserId === author.user.id ? (author.role === 'WRITER' ? "My Profile" : `My Profile (OWNER)`) : (author.role === 'WRITER' ? author.user.userName : `${author.user.userName} (OWNER)`)}
+            primary={
+              localUserId === author.user.id
+                ? author.role === "WRITER"
+                  ? "My Profile"
+                  : `My Profile (OWNER)`
+                : author.role === "WRITER"
+                ? author.user.userName
+                : `${author.user.userName} (OWNER)`
+            }
             secondary={`@${author.user.userAppName}`}
           />
           <IconButton

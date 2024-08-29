@@ -9,4 +9,7 @@ export const getUserId = () => {
     return localStorage.getItem("userId");
 } 
 
+export const getUserCurrentId = () => {
+    return Number(localStorage.getItem("userId"));
+} 
 export const userLanguage = navigator.language || navigator.userLanguage;

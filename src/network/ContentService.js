@@ -134,7 +134,6 @@ export const saveRequest = async (endoint, data) => {
   return saveNewContentData(endoint, data);
 };
 
-
 export const getSubGenres = async (id) => {
   try {
     const response = await fetch(`${PUBLIC_URL}/v1/public/genres-subs/${id}`, {
@@ -157,7 +156,7 @@ export const getSubGenres = async (id) => {
   }
 };
 
-export const updateContentStatus =  async (req) => {
+export const updateContentStatus = async (req) => {
   try {
     const response = await fetch(`${BASE_URL}/content/publish`, {
       method: "POST",
@@ -166,29 +165,7 @@ export const updateContentStatus =  async (req) => {
         "Content-Type": "application/json",
         "Accept-Language": userLanguage,
       },
-      body: JSON.stringify(req)
-    });
-    if (!response.ok) {
-      throw new Error("Save failed");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error:", error.message);
-    throw error;
-  }
-}
-
-export const getUserContentsByType = async (contentType) => {
-  try {
-    const response = await fetch(`${BASE_URL}/content/find?type=${contentType}`, {
-      method: "GET",
-      headers: {
-        Authorization: `${getToken()}`,
-        "Content-Type": "application/json",
-        "Accept-Language": userLanguage,
-      },
+      body: JSON.stringify(req),
     });
     if (!response.ok) {
       throw new Error("Save failed");
@@ -202,8 +179,32 @@ export const getUserContentsByType = async (contentType) => {
   }
 };
 
+export const getUserContentsByType = async (contentType) => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/content/find?type=${contentType}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `${getToken()}`,
+          "Content-Type": "application/json",
+          "Accept-Language": userLanguage,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
 
-export const deleteContent  = async (req) => {
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+export const deleteContent = async (req) => {
   try {
     const response = await fetch(`${BASE_URL}/content`, {
       method: "DELETE",
@@ -212,7 +213,7 @@ export const deleteContent  = async (req) => {
         "Content-Type": "application/json",
         "Accept-Language": userLanguage,
       },
-      body:JSON.stringify(req)
+      body: JSON.stringify(req),
     });
     if (!response.ok) {
       throw new Error("Save failed");
@@ -224,4 +225,26 @@ export const deleteContent  = async (req) => {
     console.error("Error:", error.message);
     throw error;
   }
-}
+};
+
+export const deleteNote = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/note`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
