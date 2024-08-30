@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   AppBar,
@@ -6,25 +6,25 @@ import {
   IconButton,
   Button,
   Typography,
+  Box,
   Slide,
   TextField,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import { saveNewContentData } from "network/ContentService";
-
-
+import { saveNewContentData, deleteSection } from "network/ContentService";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const AddSection = ({ open, onClose, content }) => {
+const AddSection = ({ open, onClose, content, editableSection }) => {
   const [isChecked, setIsChecked] = useState(false);
-
+  const quillRef = useRef(null);
   const handleSwitchChange = (event) => {
     setIsChecked(!isChecked);
   };
@@ -33,7 +33,13 @@ const AddSection = ({ open, onClose, content }) => {
   const [value, setValue] = useState("");
   const modules = {
     toolbar: [
-      [{ header: "1" }, { header: "2" }, { font: [] }],
+      [
+        { header: "1" },
+        { header: "2" },
+        { header: "3" },
+        { header: "4" },
+        { font: [] },
+      ],
       [{ size: [] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
       [
@@ -42,8 +48,8 @@ const AddSection = ({ open, onClose, content }) => {
         { indent: "-1" },
         { indent: "+1" },
       ],
-      ["link", "image", "video"],
-      ["clean"],
+      [{ color: [] }, { background: [] }],
+      ["link"],
     ],
   };
 
@@ -57,11 +63,11 @@ const AddSection = ({ open, onClose, content }) => {
     "strike",
     "blockquote",
     "list",
+    "color",
+    "background",
     "bullet",
     "indent",
     "link",
-    "image",
-    "video",
   ];
 
   const setSectionChange = (e) => {
@@ -72,6 +78,32 @@ const AddSection = ({ open, onClose, content }) => {
     setSectionDesc(e.target.value);
   };
 
+  const deleteSectionAction = () => {
+    deleteSectionRequest();
+  }
+  const deleteSectionRequest = async () => {
+    var data = {
+      id: editableSection ? editableSection.id : null,
+    };
+    try {
+      const result = await deleteSection(data);
+      if (result.success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (editableSection != null) {
+      setIsChecked(editableSection.isPublished);
+      setSection(editableSection.sectionName);
+      setSectionDesc(editableSection.sectionDesc);
+      setValue(editableSection.passage);
+    }
+  }, [editableSection]);
+
   const onSave = async (name, desc, context) => {
     var data = {
       name: name,
@@ -80,10 +112,15 @@ const AddSection = ({ open, onClose, content }) => {
       isChecked: isChecked,
       contentId: content.id,
     };
+    if (editableSection) {
+      data.sectionId = editableSection.id;
+    }
     try {
-      const result = await saveNewContentData("/content/save-section", data);
+      var url = editableSection ? "update-section" : "save-section";
+      var method = editableSection ? "PUT" : "POST";
+      const result = await saveNewContentData(`/content/${url}`, data, method);
       if (result.success) {
-        onClose()
+        onClose();
       }
     } catch (error) {
       console.error(error);
@@ -110,6 +147,30 @@ const AddSection = ({ open, onClose, content }) => {
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             {content.name}
           </Typography>
+          {editableSection && (
+            <IconButton onClick={() => deleteSectionAction()} aria-label="delete" size="large">
+              <DeleteIcon sx={{ color: "white" }} fontSize="inherit" />
+            </IconButton>
+          )}
+          <FormControlLabel
+            sx={{ marginTop: "7px", marginRight: "20px" }}
+            control={
+              <Switch
+                checked={isChecked}
+                onChange={handleSwitchChange}
+                color="primary"
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: "green",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor: "lightgreen",
+                  },
+                }}
+              />
+            }
+            label="Publish when saved!"
+          />
           <Button
             autoFocus
             color="inherit"
@@ -117,37 +178,48 @@ const AddSection = ({ open, onClose, content }) => {
               onSave(section, sectionDesc, value);
             }}
           >
-            Save
+            {editableSection === null ? "Save" : "Update"}
           </Button>
         </Toolbar>
       </AppBar>
-      <TextField
-        onChange={setSectionChange}
-        fullWidth
-        value={section}
-        label="Name"
-        id="name"
-      />
-      <TextField
-        onChange={setSectionDescChange}
-        fullWidth
-        value={sectionDesc}
-        label="Description (Optional)"
-        id="desc"
-      />
-      <FormControlLabel
-        control={<Switch checked={isChecked} onChange={handleSwitchChange} />}
-        label="Publish when saved!"
-      />
-      <div>
+      <Box sx={{ display: "flex", padding: "10px", marginTop: "10px" }}>
+        <TextField
+          onChange={setSectionChange}
+          fullWidth
+          sx={{
+            flex: "1",
+            marginRight: "10px",
+          }}
+          value={section}
+          label="Name"
+          id="name"
+        />
+        <TextField
+          onChange={setSectionDescChange}
+          fullWidth
+          sx={{
+            flex: "2",
+          }}
+          value={sectionDesc}
+          label="Description (Optional)"
+          id="desc"
+        />
+      </Box>
+      <Box
+        sx={{
+          margin: "10px",
+        }}
+      >
         <ReactQuill
+          ref={quillRef}
           value={value}
+          style={{ height: "70vh" }}
           onChange={setValue}
           modules={modules}
           formats={formats}
           theme="snow"
         />
-      </div>
+      </Box>
     </Dialog>
   );
 };

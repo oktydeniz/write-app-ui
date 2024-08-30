@@ -37,7 +37,6 @@ const Notification = () => {
   return (
     <div>
     <h1>Bildirimler</h1>
-    <p>Gelen davetler burada listeleniyor:</p>
     <List>
       {invitations.map((invite) => (
         <ListItem key={invite.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

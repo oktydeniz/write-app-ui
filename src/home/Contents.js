@@ -151,7 +151,7 @@ const Contents = () => {
                 <Grid item xs={12} sx={{ padding: 2 }}>
                   <Grid container justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
-                      {`${item.genre.name} - ${item.clickedCount} clicks`}
+                      {`${item.genre.label} - ${item.clickedCount} clicks`}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {item.price ? `${item.price} ${item.currency} ` : "Free"}
@@ -198,6 +198,10 @@ const Contents = () => {
           ))}
         </Box>
       </div>
+
+      {
+        sharedWithMe.length <1 && contents.length < 1 && <p className="no-data-p">You Don't have content yet!</p>
+      }
     </>
   );
 };

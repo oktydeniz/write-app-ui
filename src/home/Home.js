@@ -34,7 +34,7 @@ const Home = () => {
   const [name, setName] = useState("");
   const [tags, setTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [about, setAbout] = useState("");
   const [isChecked, setIsChecked] = useState(true);
   const [priceInput, setPriceInput] = useState("");

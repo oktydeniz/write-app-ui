@@ -1,9 +1,9 @@
 import { BASE_URL, getToken, PUBLIC_URL, userLanguage } from "./Constant";
 
-export const saveNewContentData = async (endoint, content) => {
+export const saveNewContentData = async (endoint, content, method = "POST") => {
   try {
     const response = await fetch(BASE_URL + endoint, {
-      method: "POST",
+      method: method,
       headers: {
         Authorization: `${getToken()}`,
         "Content-Type": "application/json",
@@ -248,3 +248,112 @@ export const deleteNote = async (req) => {
     throw error;
   }
 };
+
+export const changePublishSection = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/section-publish`, {
+      method: "POST",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+export const bookmarkInfo = async (id) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/bookmark/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+export const setBookmarkInfo = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/bookmark`, {
+      method: "POST",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+export const updateBookmarkInfo = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/bookmark`, {
+      method: "POST",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+export const deleteSection = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/delete-section`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}

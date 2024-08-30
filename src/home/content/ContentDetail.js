@@ -1,4 +1,10 @@
-import { getContentBySlug, getNotes } from "network/ContentService";
+import {
+  getContentBySlug,
+  getNotes,
+  changePublishSection,
+  updateBookmarkInfo,
+  bookmarkInfo,
+} from "network/ContentService";
 import React, { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
@@ -11,9 +17,12 @@ import Tabs from "@mui/material/Tabs";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Tab from "@mui/material/Tab";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import Box from "@mui/material/Box";
 import DOMPurify from "dompurify";
 import Fab from "@mui/material/Fab";
+import IconButton from '@mui/material/IconButton';
 import AddIcon from "@mui/icons-material/Add";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -28,6 +37,9 @@ import Authors from "./Authors";
 import AddContent from "./AddContent";
 import ContentMoreOptions from "./ContentMoreOptions";
 import { truncateText } from "utils/StringUtil";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { getUserCurrentId } from "network/Constant";
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -71,8 +83,9 @@ const ContentDetail = () => {
   const [value, setValue] = React.useState(0);
   const [switchStates, setSwitchStates] = useState({});
   const [notes, setNotes] = useState([]);
-  const [isChecked, setIsChecked] = useState(false);
+  const [editableSection, setEditableSection] = useState(null);
   const [combinedPassages, setCombinedPassages] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -97,6 +110,7 @@ const ContentDetail = () => {
       const result = await getContentBySlug(contentSlug);
       if (result.success) {
         setContent(result.response);
+        getBookmarkInfo(result.response.id);
       }
     } catch (error) {
       console.error(error);
@@ -118,11 +132,24 @@ const ContentDetail = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const getBookmarkInfo = async (id) => {
+    try{
+      const response = await bookmarkInfo(id);
+      if(response.success){
+        setIsBookmarked(response.response)
+      }else {
+        setIsBookmarked(false);
+      }
+    }catch(err){
+      console.log(err)
+    }
   }
 
   const handleRefresh = () => {
     fetchNotes();
-  }
+  };
   const fetchSectionData = async () => {
     setPassages([]);
     setSwitchStates([]);
@@ -136,31 +163,64 @@ const ContentDetail = () => {
         }, {});
         setSwitchStates(initialSwitchStates);
         combinePassages(result.response);
-        
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleToggleBookmark = () => {
+    setIsBookmarked((isBookmarked) => !isBookmarked);
+    sendBookmarkInfo();
+  };
+
+  const sendBookmarkInfo = async () => {
+    var data = {
+      id:content.id,
+    }
+    try{
+      const response = await updateBookmarkInfo(data);
+      if(response.success){
+        setIsBookmarked(response.response)
+      }else {
+        setIsBookmarked(false);
+      }
+    }catch(err){
+      console.log(err)
+    }
+  }
   const combinePassages = (passages) => {
-    const combined = passages.map((passage, index) => {
-      return `<h2>${passage.sectionName}</h2><p>${passage.passage}</p>`;
-    }).join(""); 
-  
+    const combined = passages
+      .map((passage, index) => {
+        return `<h2>${passage.sectionName}</h2><p>${passage.passage}</p>`;
+      })
+      .join("");
+
     setCombinedPassages(combined);
   };
 
-  const handleSwitchChange = (event, id) => {
+  const handleSwitchChange = async (event, id) => {
     const newState = !switchStates[id];
     setSwitchStates((prevStates) => ({
       ...prevStates,
       [id]: newState,
     }));
-    console.log("Switch toggled for item with ID:", id, "New State:", newState);
+    var data = {
+      sectionId: id,
+      state: newState,
+    };
+    try {
+      const response = await changePublishSection(data);
+      if (response) {
+        fetchSectionData();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
-  const handleEdit = (index) => {
-    console.log(`Edit section at index ${index}`);
+  const handleEdit = (item, idx) => {
+    setEditableSection(item);
+    handleClickOpen();
   };
   const [showReader, setShowReader] = useState(false);
 
@@ -181,13 +241,12 @@ const ContentDetail = () => {
   const actionHandler = () => {
     fetchData();
     handleCloseContent();
-  }
-  
+  };
   return (
     <div className="content-detail">
       {content ? (
         <>
-          <Card sx={{ display: "flex", margin: "10px" }}>
+          <Card sx={{ display: "flex", margin: "10px", position: "relative" }}>
             <CardMedia
               component="img"
               sx={{ width: 140 }}
@@ -200,15 +259,27 @@ const ContentDetail = () => {
                   <Typography variant="body2" color="text.secondary">
                     {`${content.genre.label} - ${content.clickedCount} clicks`}
                   </Typography>
-                  <Button  onClick={handleClickOpenContent} variant="body2" color="text.secondary">
+                  {
+                    content.createdBy.id === getUserCurrentId() ?
+                  <Button
+                    onClick={handleClickOpenContent}
+                    variant="body2"
+                    color="text.secondary"
+                  >
                     Edit
-                  </Button>
+                  </Button> : <IconButton onClick={handleToggleBookmark}>
+                    {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                  </IconButton>}
                 </Grid>
-                <Typography variant="h6" component="div">
+                <Typography
+                  sx={{display: "flex", alignItems: "center" }}
+                  variant="h6"
+                  component="div"
+                >
                   {content.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {truncateText(content.description,400)}
+                  {truncateText(content.description, 400)}
                 </Typography>
 
                 <Grid container spacing={1} sx={{ marginTop: 1 }}>
@@ -232,8 +303,27 @@ const ContentDetail = () => {
                 </Grid>
               </Grid>
             </Grid>
+            <Fab
+              sx={{
+                position: "absolute !important",
+                bottom: "10px",
+                right: "10px",
+              }}
+              className="floating-btn-read"
+              onClick={handleReadClick}
+              size="small"
+              color="primary"
+              aria-label="read"
+            >
+              <MenuBookIcon />
+            </Fab>
           </Card>
-          <AddContent open={openContentdialog}  handleClose={handleCloseContent} actionHandler={actionHandler} content={content}/>
+          <AddContent
+            open={openContentdialog}
+            handleClose={handleCloseContent}
+            actionHandler={actionHandler}
+            content={content}
+          />
           <Box sx={{ width: "100%" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs
@@ -245,16 +335,14 @@ const ContentDetail = () => {
                 <Tab label="Notes" {...a11yProps(1)} />
                 <Tab label="Authors" {...a11yProps(2)} />
                 <Tab label="Comments" {...a11yProps(3)} />
-                <Tab label="More" {...a11yProps(4)} />
+                {
+                  content.createdBy.id === getUserCurrentId() && <Tab label="More" {...a11yProps(4)} />
+                }
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
               {passages.length > 0 ? (
                 <>
-                <Button variant="contained" color="primary" onClick={handleReadClick}>
-                  Read
-                </Button>
-
                   <FullScreenReader
                     combinedPassages={combinedPassages}
                     open={showReader}
@@ -268,8 +356,9 @@ const ContentDetail = () => {
                       sx={{
                         backgroundColor: item.isPublished
                           ? "transparent"
-                          : "#f0f0f0", 
+                          : "#f0f0f0",
                         opacity: item.isPublished ? 1 : 0.6,
+                        marginBottom: "8px",
                       }}
                     >
                       <AccordionSummary
@@ -287,23 +376,30 @@ const ContentDetail = () => {
                         ) : null}
                       </AccordionSummary>
                       <AccordionDetails>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          onClick={() => handleEdit(item.id)} // Handle edit button click
-                          sx={{ height: "25px", marginLeft: "10px" }}
-                        >
-                          Edit
-                        </Button>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={switchStates[item.id] || false}
-                              onChange={(e) => handleSwitchChange(e, item.id)}
+                        {(item.user.id === getUserCurrentId() || content.createdBy.id === getUserCurrentId())&& (
+                          <Box className="section-options">
+                            <Button
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => handleEdit(item, index)}
+                              sx={{ height: "30px", marginRight: "20px" }}
+                            >
+                              Edit
+                            </Button>
+                            <FormControlLabel
+                              sx={{ paddingTop: "6px" }}
+                              control={
+                                <Switch
+                                  checked={switchStates[item.id] || false}
+                                  onChange={(e) =>
+                                    handleSwitchChange(e, item.id)
+                                  }
+                                />
+                              }
+                              label="Publish"
                             />
-                          }
-                          label="Publish"
-                        />
+                          </Box>
+                        )}
                         <Typography
                           component="div"
                           dangerouslySetInnerHTML={{
@@ -314,9 +410,14 @@ const ContentDetail = () => {
                     </Accordion>
                   ))}
                 </>
-              ) : <p className="no-data-p">
-                You Have not created a section for {content.name}. <span style={{cursor:'pointer'}} onClick={handleClickOpen}>Click Here or Plus Button to create new section</span>
-              </p>}
+              ) : (
+                <p className="no-data-p">
+                  You Have not created a section for {content.name}.{" "}
+                  <span style={{ cursor: "pointer" }} onClick={handleClickOpen}>
+                    Click Here or Plus Button to create new section
+                  </span>
+                </p>
+              )}
               <Fab
                 className="floating-btn"
                 onClick={handleClickOpen}
@@ -328,10 +429,10 @@ const ContentDetail = () => {
               </Fab>
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <Notes notes={notes} content={content} trigger={handleRefresh}/>
+              <Notes notes={notes} content={content} trigger={handleRefresh} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-              <Authors content={content}/>
+              <Authors content={content} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={3}></CustomTabPanel>
             <CustomTabPanel value={value} index={4}>
@@ -339,7 +440,12 @@ const ContentDetail = () => {
             </CustomTabPanel>
           </Box>
           {open ? (
-            <AddSection open={open} content={content} onClose={handleClose} />
+            <AddSection
+              open={open}
+              content={content}
+              onClose={handleClose}
+              editableSection={editableSection}
+            />
           ) : (
             <></>
           )}
