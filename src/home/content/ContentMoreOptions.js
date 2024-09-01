@@ -7,11 +7,22 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { updateContentStatus, deleteContent } from "network/ContentService";
-import { useNavigate} from "react-router-dom";
+import {
+  updateContentStatus,
+  deleteContent,
+  getCopyrights,
+} from "network/ContentService";
+import { useNavigate } from "react-router-dom";
+import { getCopyrightDesc } from "utils/data";
+import Select from "react-select";
+import { editCopyrightData } from "network/AppService";
 
 const ContentMoreOptions = ({ content }) => {
   const [isPublished, setIsPublished] = useState(content.isPublished);
+  const [copyright, setCopyright] = useState();
+  const [copyrightDesc, setCopyrightDesc] = useState();
+  const [copyrightList, setCopyrightList] = useState();
+
   const navigate = useNavigate();
 
   const updateStatus = async () => {
@@ -29,6 +40,10 @@ const ContentMoreOptions = ({ content }) => {
     }
   };
 
+  useEffect(() => {
+    getCopyright();
+  }, []);
+
   const deleteAction = async () => {
     var data = {
       id: content.id,
@@ -37,6 +52,41 @@ const ContentMoreOptions = ({ content }) => {
       const result = await deleteContent(data);
       if (result.success) {
         navigate("/contents");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getCopyright = async () => {
+    try {
+      const result = await getCopyrights();
+      if (result.success) {
+        setCopyrightList(result.copyrights);
+        const selectedCopyright = result.copyrights.find(
+          (copyright) => content.copyright.value === copyright.value
+        );
+        setCopyright(selectedCopyright);
+        setCopyrightDesc(getCopyrightDesc(selectedCopyright.value));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleChangeCopyright =async (selectedOption) => {
+    setCopyright(selectedOption);
+    setCopyrightDesc(getCopyrightDesc(selectedOption.value));
+    var data = {
+      content:content.id,
+      value: selectedOption.value,
+    }
+    try {
+      const result = await editCopyrightData(data);
+      if(result.success){
+
+      }else {
+
       }
     } catch (error) {
       console.error(error);
@@ -59,6 +109,34 @@ const ContentMoreOptions = ({ content }) => {
           sx={{ justifyContent: "space-between", display: "flex" }}
         />
       </Box>
+      <div className="select-item">
+        <div className="item-span">Copyright</div>
+        <Select
+          className="basic-single"
+          classNamePrefix="select"
+          isSearchable={true}
+          value={copyright}
+          onChange={handleChangeCopyright}
+          options={copyrightList}
+          name=".contents"
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              height: "55px",
+              minHeight: "55px",
+            }),
+            valueContainer: (provided) => ({
+              ...provided,
+              height: "55px",
+              display: "flex",
+              alignItems: "center",
+            }),
+          }}
+        />
+      </div>
+      {copyrightDesc && (
+        <div className="item-span desc-text"> {copyrightDesc}</div>
+      )}
       <Box sx={{ my: 3, width: "100%" }}>
         <Button
           variant="contained"

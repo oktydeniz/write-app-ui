@@ -18,10 +18,10 @@ import { sendGETRequestWithToken } from "network/PublicService";
 import { Input, Box } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { PUBLIC_URL } from "network/Constant";
-import { getSubGenres, saveNewContentData } from "network/ContentService";
+import { getSubGenres, saveNewContentData, getCopyrights } from "network/ContentService";
 import { useNavigate } from "react-router-dom";
 import { convertToNumber } from "utils/StringUtil";
-import { currencies, languages } from "utils/data";
+import { currencies, languages, getCopyrightDesc } from "utils/data";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -38,6 +38,9 @@ const Home = () => {
   const [about, setAbout] = useState("");
   const [isChecked, setIsChecked] = useState(true);
   const [priceInput, setPriceInput] = useState("");
+  const [copyright, setCopyright] = useState();
+  const [copyrightDesc, setCopyrightDesc] = useState();
+  const [copyrightList, setCopyrightList] = useState();
   const [selectedLanguage, setSelectedLanguage] = useState();
   const [selectedCurrent, setSelectedCurrent] = useState(currencies[0].value);
   const [errorText, setErrorText] = useState(null);
@@ -125,7 +128,33 @@ const Home = () => {
       tags: selectedTags,
       isFree: isChecked,
       language: selectedLanguage,
+      copyright:copyright
     };
+    console.log(data);
+    setErrorText(null);
+    if(name ===''|| name == null){
+      setErrorText('Please Check Name İnput');
+      return;
+    }else if (selectedValue == null ){
+      setErrorText('Please Check Category İnput');
+      return;
+    }else if (copyright === "Select" ){
+      setErrorText('Please Chose a Copyrigth');
+      return;
+    } else if (copyright === "Select" ){
+      setErrorText('Please Chose a Copyrigth');
+      return;
+    }else if (tags.length <1){
+      setErrorText('Please Chose Tags');
+      return;
+    }else if(selectedLanguage == null || selectedLanguage.value === 'NULL'){
+      setErrorText('Please Chose a Language');
+      return;
+    }else if(about ===''|| about == null){
+      setErrorText('Please Check About İnput');
+      return;
+    }
+    
     try {
       const result = await saveNewContentData("/content", data);
       if (result.success) {
@@ -146,7 +175,7 @@ const Home = () => {
         if (result.success) {
           setContents(result.response);
           if (result.response.length > 0) {
-            setSelectedValue(result.response[0].id);
+            setSelectedValue(null);
           }
         }
       } catch (error) {
@@ -154,8 +183,26 @@ const Home = () => {
       }
     };
     fetchData();
+    getCopyright();
   }, []);
 
+  const getCopyright = async () => {
+    setCopyright([])
+    try {
+      const result = await getCopyrights();
+      if (result.success) {
+        setCopyrightList(result.copyrights);
+        setCopyright("Select")
+        setCopyrightDesc(null)
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  const handleChangeForCopyright = (selectedOption) => {
+    setCopyright(selectedOption.value)
+    setCopyrightDesc(getCopyrightDesc(selectedOption.value));
+  }
   const fetchTagData = async (id) => {
     setTags([]);
     setSelectedTags([]);
@@ -170,9 +217,16 @@ const Home = () => {
   };
 
   const handleChangeForGenre = (selectedOption) => {
-    setSelectedValue(selectedOption.value);
-    fetchTagData(selectedOption.value);
+    if(selectedOption && selectedOption.value){
+      setSelectedValue(selectedOption.value);
+      fetchTagData(selectedOption.value);
+    }else {
+      setSelectedTags([])
+      setTags([])
+    }
   };
+  
+
   const handleChangeForTags = (selectedOption) => {
     setSelectedTags(selectedOption.map((item) => item.value));
   };
@@ -271,6 +325,7 @@ const Home = () => {
               className="name"
               onChange={handleName}
               fullWidth
+              required
               value={name}
               label="Name"
               id="name"
@@ -280,6 +335,7 @@ const Home = () => {
               label="About"
               multiline
               fullWidth
+              required
               value={about}
               onChange={handleAbout}
               rows={6}
@@ -314,7 +370,6 @@ const Home = () => {
                       className="basic-single"
                       classNamePrefix="select"
                       defaultValue={currencies[0]}
-                      isClearable={true}
                       isSearchable={true}
                       onChange={handleCurrency}
                       options={currencies}
@@ -345,8 +400,7 @@ const Home = () => {
             <Select
               className="basic-single"
               classNamePrefix="select"
-              defaultValue={contents[0]}
-              isClearable={true}
+              defaultValue={{value:-22, label:"Select"}}
               isSearchable={true}
               onChange={handleChangeForGenre}
               options={contents}
@@ -423,6 +477,38 @@ const Home = () => {
               }}
             />
           </div>
+          <br/>
+          <div className="select-item">
+            <div className="item-span">Copyright</div>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              defaultValue={copyright}
+              isSearchable={true}
+              onChange={handleChangeForCopyright}
+              options={copyrightList}
+              name=".contents"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  minHeight: "55px",
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  display: "flex",
+                  alignItems: "center",
+                }),
+              }}
+            />
+          </div>
+          {
+            copyrightDesc && <div className="item-span desc-text"> {
+              copyrightDesc
+            }
+              </div>
+          }
         </div>
       </Dialog>
     </div>

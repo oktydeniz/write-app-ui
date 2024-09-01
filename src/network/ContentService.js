@@ -357,3 +357,70 @@ export const deleteSection = async (req) => {
     throw error;
   }
 }
+
+
+export const getCopyrights = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/copyrights`, {
+      method: "GET",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+};
+
+export const changeAuthorPerm = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/authors/role-update`, {
+      method: "POST",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}
+
+
+export const deleteAuthorPerm = async (req) => {
+  try {
+    const response = await fetch(`${BASE_URL}/content/authors/role-delete`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `${getToken()}`,
+        "Content-Type": "application/json",
+        "Accept-Language": userLanguage,
+      },
+      body: JSON.stringify(req),
+    });
+    if (!response.ok) {
+      throw new Error("Save failed");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error:", error.message);
+    throw error;
+  }
+}

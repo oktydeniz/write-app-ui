@@ -22,7 +22,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import Box from "@mui/material/Box";
 import DOMPurify from "dompurify";
 import Fab from "@mui/material/Fab";
-import IconButton from '@mui/material/IconButton';
+import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -95,6 +95,7 @@ const ContentDetail = () => {
   };
 
   const handleClose = () => {
+    setEditableSection(null);
     setOpen(false);
     fetchSectionData();
   };
@@ -135,17 +136,17 @@ const ContentDetail = () => {
   };
 
   const getBookmarkInfo = async (id) => {
-    try{
+    try {
       const response = await bookmarkInfo(id);
-      if(response.success){
-        setIsBookmarked(response.response)
-      }else {
+      if (response.success) {
+        setIsBookmarked(response.response);
+      } else {
         setIsBookmarked(false);
       }
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
   const handleRefresh = () => {
     fetchNotes();
@@ -162,7 +163,7 @@ const ContentDetail = () => {
           return acc;
         }, {});
         setSwitchStates(initialSwitchStates);
-        combinePassages(result.response);
+        //combinePassages(result.response);
       }
     } catch (error) {
       console.error(error);
@@ -176,19 +177,20 @@ const ContentDetail = () => {
 
   const sendBookmarkInfo = async () => {
     var data = {
-      id:content.id,
-    }
-    try{
+      id: content.id,
+    };
+    try {
       const response = await updateBookmarkInfo(data);
-      if(response.success){
-        setIsBookmarked(response.response)
-      }else {
+      if (response.success) {
+        setIsBookmarked(response.response);
+      } else {
         setIsBookmarked(false);
       }
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
+  /*
   const combinePassages = (passages) => {
     const combined = passages
       .map((passage, index) => {
@@ -198,7 +200,7 @@ const ContentDetail = () => {
 
     setCombinedPassages(combined);
   };
-
+*/
   const handleSwitchChange = async (event, id) => {
     const newState = !switchStates[id];
     setSwitchStates((prevStates) => ({
@@ -259,20 +261,22 @@ const ContentDetail = () => {
                   <Typography variant="body2" color="text.secondary">
                     {`${content.genre.label} - ${content.clickedCount} clicks`}
                   </Typography>
-                  {
-                    content.createdBy.id === getUserCurrentId() ?
-                  <Button
-                    onClick={handleClickOpenContent}
-                    variant="body2"
-                    color="text.secondary"
-                  >
-                    Edit
-                  </Button> : <IconButton onClick={handleToggleBookmark}>
-                    {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
-                  </IconButton>}
+                  {content.createdBy.id === getUserCurrentId() ? (
+                    <Button
+                      onClick={handleClickOpenContent}
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      Edit
+                    </Button>
+                  ) : (
+                    <IconButton onClick={handleToggleBookmark}>
+                      {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                    </IconButton>
+                  )}
                 </Grid>
                 <Typography
-                  sx={{display: "flex", alignItems: "center" }}
+                  sx={{ display: "flex", alignItems: "center" }}
                   variant="h6"
                   component="div"
                 >
@@ -298,7 +302,7 @@ const ContentDetail = () => {
                   sx={{ marginTop: 2 }}
                 >
                   <Typography variant="caption" color="text.secondary">
-                    {content.getAverageRating}
+                    {content.averageRating}
                   </Typography>
                 </Grid>
               </Grid>
@@ -335,19 +339,23 @@ const ContentDetail = () => {
                 <Tab label="Notes" {...a11yProps(1)} />
                 <Tab label="Authors" {...a11yProps(2)} />
                 <Tab label="Comments" {...a11yProps(3)} />
-                {
-                  content.createdBy.id === getUserCurrentId() && <Tab label="More" {...a11yProps(4)} />
-                }
+                {content.createdBy.id === getUserCurrentId() && (
+                  <Tab label="More" {...a11yProps(4)} />
+                )}
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
               {passages.length > 0 ? (
                 <>
-                  <FullScreenReader
-                    combinedPassages={combinedPassages}
-                    open={showReader}
-                    onClose={handleCloseReader}
-                  />
+                  {showReader && (
+                    <FullScreenReader
+                      content={contentSlug}
+                      open={showReader}
+                      creator={content.createdBy.userAppName}
+                      handleClose={handleCloseReader}
+                    />
+                  )}
+
                   {passages.map((item, index) => (
                     <Accordion
                       key={index}
@@ -366,8 +374,19 @@ const ContentDetail = () => {
                         aria-controls={`panel${index}-content`}
                         id={`panel${index}-header`}
                       >
-                        <Typography sx={{ width: "33%", flexShrink: 0 }}>
-                          {item.sectionName}
+                        <Typography sx={{ width: "50%", flexShrink: 0 }}>
+                          {`${item.sectionName}`}
+                          {item.user.id !== getUserCurrentId() && (
+                            <>
+                              {}
+                              <Typography
+                                component="span"
+                                sx={{ fontWeight: "bold" }}
+                              >
+                                {` Writen by @${item.user.userAppName}`}
+                              </Typography>
+                            </>
+                          )}
                         </Typography>
                         {item.sectionDesc ? (
                           <Typography sx={{ color: "text.secondary" }}>
@@ -376,28 +395,34 @@ const ContentDetail = () => {
                         ) : null}
                       </AccordionSummary>
                       <AccordionDetails>
-                        {(item.user.id === getUserCurrentId() || content.createdBy.id === getUserCurrentId())&& (
+                        {(item.user.id === getUserCurrentId() ||
+                          content.createdBy.id === getUserCurrentId()) && (
                           <Box className="section-options">
-                            <Button
-                              variant="outlined"
-                              color="primary"
-                              onClick={() => handleEdit(item, index)}
-                              sx={{ height: "30px", marginRight: "20px" }}
-                            >
-                              Edit
-                            </Button>
-                            <FormControlLabel
-                              sx={{ paddingTop: "6px" }}
-                              control={
-                                <Switch
-                                  checked={switchStates[item.id] || false}
-                                  onChange={(e) =>
-                                    handleSwitchChange(e, item.id)
-                                  }
-                                />
-                              }
-                              label="Publish"
-                            />
+                            {content.contentMyRole != "VIEWER" && (
+                              <Button
+                                variant="outlined"
+                                color="primary"
+                                onClick={() => handleEdit(item, index)}
+                                sx={{ height: "30px", marginRight: "20px" }}
+                              >
+                                Edit
+                              </Button>
+                            )}
+
+                            {content.createdBy.id === getUserCurrentId() && (
+                              <FormControlLabel
+                                sx={{ paddingTop: "6px" }}
+                                control={
+                                  <Switch
+                                    checked={switchStates[item.id] || false}
+                                    onChange={(e) =>
+                                      handleSwitchChange(e, item.id)
+                                    }
+                                  />
+                                }
+                                label="Publish"
+                              />
+                            )}
                           </Box>
                         )}
                         <Typography
@@ -413,20 +438,27 @@ const ContentDetail = () => {
               ) : (
                 <p className="no-data-p">
                   You Have not created a section for {content.name}.{" "}
-                  <span style={{ cursor: "pointer" }} onClick={handleClickOpen}>
-                    Click Here or Plus Button to create new section
-                  </span>
+                  {content.contentMyRole != "VIEWER" && (
+                    <span
+                      style={{ cursor: "pointer" }}
+                      onClick={handleClickOpen}
+                    >
+                      Click Here or Plus Button to create new section
+                    </span>
+                  )}
                 </p>
               )}
-              <Fab
-                className="floating-btn"
-                onClick={handleClickOpen}
-                size="small"
-                color="primary"
-                aria-label="add"
-              >
-                <AddIcon />
-              </Fab>
+              {content.contentMyRole != "VIEWER" && (
+                <Fab
+                  className="floating-btn"
+                  onClick={handleClickOpen}
+                  size="small"
+                  color="primary"
+                  aria-label="add"
+                >
+                  <AddIcon />
+                </Fab>
+              )}
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
               <Notes notes={notes} content={content} trigger={handleRefresh} />

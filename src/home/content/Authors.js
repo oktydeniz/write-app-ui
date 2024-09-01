@@ -5,14 +5,25 @@ import {
   ListItem,
   ListItemAvatar,
   Avatar,
+  ListItemIcon,
   ListItemText,
+  MenuItem,
   Box,
   Button,
   IconButton,
 } from "@mui/material";
+import Select from "react-select";
 import { getUserId } from "network/Constant";
-import { ArrowForwardIos } from "@mui/icons-material";
-import { getAuthors } from "network/ContentService";
+import { ArrowForwardIos, Delete } from "@mui/icons-material";
+import {
+  getAuthors,
+  changeAuthorPerm,
+  deleteAuthorPerm,
+} from "network/ContentService";
+import { selectOptionsForAuthorType } from "utils/data";
+
+const localUserId = Number(localStorage.getItem("userId"));
+
 const Authors = ({ content }) => {
   const [query, setQuery] = useState("");
   const [authors, setAuthors] = useState([]);
@@ -43,7 +54,9 @@ const Authors = ({ content }) => {
     return () => clearTimeout(timeoutId);
   }, [query]);
 
-  useEffect(() => {}, []);
+  const isAdmin = () => {
+    return content.createdBy.id === localUserId;
+  };
 
   const fetchAuthors = async () => {
     try {
@@ -51,6 +64,32 @@ const Authors = ({ content }) => {
       setAuthors(response);
     } catch (error) {
       console.error("Error fetching Authors:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    var data = {
+      userId: id,
+      content: content.id,
+    };
+    try {
+      const result = await deleteAuthorPerm(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleChangeForAuthorPerm = async (selectedOption, id) => {
+    var data = {
+      userId: id,
+      permissionLevel: selectedOption.value,
+      content: content.id,
+    };
+
+    try {
+      const result = await changeAuthorPerm(data);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -71,7 +110,7 @@ const Authors = ({ content }) => {
 
   return (
     <div>
-      { Number(getUserId()) === content.createdBy.id &&
+      {Number(getUserId()) === content.createdBy.id && (
         <Box>
           <input
             className="searc-input"
@@ -91,10 +130,15 @@ const Authors = ({ content }) => {
             ))}
           </List>
         </Box>
-      }
+      )}
       <h4>Authors</h4>
       <div className="author-list">
-        <AuthorList authors={authors} />
+        <AuthorList
+          authors={authors}
+          handleDelete={handleDelete}
+          isAdmin={isAdmin()}
+          handleChangeForAuthorPerm={handleChangeForAuthorPerm}
+        />
       </div>
     </div>
   );
@@ -126,9 +170,14 @@ const AuthorListItem = ({ user, onInvite }) => {
   );
 };
 
-const AuthorList = ({ authors }) => {
-  const localUserId = Number(localStorage.getItem("userId"));
+const AuthorList = ({
+  authors,
+  handleDelete,
+  isAdmin,
+  handleChangeForAuthorPerm,
+}) => {
   const sortedAuthors = authors.sort((a, b) => a.role - b.role);
+
   return (
     <List>
       {sortedAuthors.map((author) => (
@@ -140,21 +189,68 @@ const AuthorList = ({ authors }) => {
             borderRadius: 1,
           }}
         >
+          {isAdmin && localUserId != author.user.id && (
+            <ListItemIcon
+              sx={{
+                justifyContent: "center",
+                minWidth: "auto",
+                marginRight: 2,
+              }}
+            >
+              <IconButton
+                edge="start"
+                aria-label="delete"
+                onClick={() => handleDelete(author.user.id)}
+              >
+                <Delete />
+              </IconButton>
+            </ListItemIcon>
+          )}
+
           <ListItemAvatar>
             <Avatar src={author.user.userAvatar} alt={author.user.userName} />
           </ListItemAvatar>
           <ListItemText
             primary={
               localUserId === author.user.id
-                ? author.role === "WRITER"
+                ? author.role === "WRITER" || author.role === "VIEWER"
                   ? "My Profile"
                   : `My Profile (OWNER)`
-                : author.role === "WRITER"
+                : author.role === "WRITER" || author.role === "VIEWER"
                 ? author.user.userName
                 : `${author.user.userName} (OWNER)`
             }
             secondary={`@${author.user.userAppName}`}
           />
+          {isAdmin && localUserId != author.user.id && (
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              closeMenuOnSelect={true}
+              onChange={(selectedOption) =>
+                handleChangeForAuthorPerm(selectedOption, author.user.id)
+              }
+              defaultValue={selectOptionsForAuthorType.find(
+                (type) => type.role === author.role
+              )}
+              options={selectOptionsForAuthorType}
+              name="tags"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  minHeight: "55px",
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  display: "flex",
+                  alignItems: "center",
+                }),
+              }}
+            />
+          )}
+
           <IconButton
             edge="end"
             onClick={() =>

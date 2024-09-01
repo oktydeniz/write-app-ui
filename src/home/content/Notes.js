@@ -14,6 +14,8 @@ import AddIcon from "@mui/icons-material/Add";
 import AddNote from "home/content/AddNote";
 import { truncateText } from "utils/StringUtil";
 import { getUserId } from "network/Constant";
+
+
 const Notes = ({ notes, content, trigger }) => {
   const [open, setOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -22,7 +24,6 @@ const Notes = ({ notes, content, trigger }) => {
   const handleClickOpen = () => {
     setIsEdit(null);
     setOpen(true);
-    console.log(isEdit);
   };
   const handleClose = () => {
     setOpen(false);
@@ -36,7 +37,6 @@ const Notes = ({ notes, content, trigger }) => {
   const handleEdit = (note) => {
     handleCloseNote();
     setOpen(true);
-    console.log(note);
   };
 
   const handleCloseNote = () => {
@@ -103,12 +103,15 @@ const Notes = ({ notes, content, trigger }) => {
         edit={isEdit}
         trigger={trigger}
       />
-      <ShowNote
+      {
+        isEdit && <ShowNote
         note={isEdit}
         handleEdit={handleEdit}
         handleClose={handleCloseNote}
         open={isOpenNote}
       />
+      }
+      
     </Box>
   );
 };

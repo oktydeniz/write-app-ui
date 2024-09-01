@@ -17,7 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { saveNewContentData, deleteSection } from "network/ContentService";
-
+import { getUserCurrentId } from "network/Constant";
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -36,8 +36,6 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
       [
         { header: "1" },
         { header: "2" },
-        { header: "3" },
-        { header: "4" },
         { font: [] },
       ],
       [{ size: [] }],
@@ -152,6 +150,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
               <DeleteIcon sx={{ color: "white" }} fontSize="inherit" />
             </IconButton>
           )}
+          {(content.contentMyRole != "VIEWER" && content.createdBy.id === getUserCurrentId()) && (
           <FormControlLabel
             sx={{ marginTop: "7px", marginRight: "20px" }}
             control={
@@ -170,7 +169,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
               />
             }
             label="Publish when saved!"
-          />
+          />)}
           <Button
             autoFocus
             color="inherit"

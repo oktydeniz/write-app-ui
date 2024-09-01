@@ -344,7 +344,6 @@ const AddContent = ({ open, handleClose, actionHandler, content }) => {
               className="basic-single"
               classNamePrefix="select"
               defaultValue={selectedValue}
-              isClearable={true}
               isSearchable={true}
               onChange={handleChangeForGenre}
               options={contents}
