@@ -1,4 +1,4 @@
-import { BASE_URL, getToken, userLanguage } from "network/Constant";
+import { BASE_URL,PUBLIC_URL, getToken, userLanguage } from "network/Constant";
 
 export const fetchBookToRead = async(slug, creator) => {
     return baseFetch(`/read/${creator}/${slug}`, {
@@ -13,6 +13,13 @@ export const editCopyrightData = (req) => {
     });
 };
 
+export const savePaperData = (req) => {
+  return baseFetch("/papers", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+};
+
 const baseFetch = async (endpoint, options) => {
     try {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -24,7 +31,7 @@ const baseFetch = async (endpoint, options) => {
           ...options.headers,
         },
       });
-  
+      debugger;
       const data = await response.json();
       if (!response.ok) {
         return { success: false, message: data.message || "Request failed" };
@@ -34,4 +41,47 @@ const baseFetch = async (endpoint, options) => {
       console.error("Error:", error.message);
       throw error;
     }
-  };
+};
+
+export const handleUploadNativeFile = async (file, saveContentCallback, setErrorCallback) => {
+  if (!file) {
+    if (setErrorCallback && typeof setErrorCallback === 'function') {
+      setErrorCallback("You need to add a Cover Image");
+    }
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await fetch(PUBLIC_URL + "/v1/files/upload-native", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Upload failed");
+    }
+
+    const data = await response.json();
+    const filePath = data.filePath;
+
+    await fetch(PUBLIC_URL + "/v1/files/saveFilePath", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ filePath }),
+    });
+
+    if (saveContentCallback && typeof saveContentCallback === 'function') {
+      saveContentCallback(filePath);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    if (setErrorCallback && typeof setErrorCallback === 'function') {
+      setErrorCallback("An error occurred during the upload");
+    }
+  }
+};

@@ -18,12 +18,14 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { saveNewContentData, deleteSection } from "network/ContentService";
 import { getUserCurrentId } from "network/Constant";
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const AddSection = ({ open, onClose, content, editableSection }) => {
   const [isChecked, setIsChecked] = useState(false);
+  const [index, setIndex] = useState();
   const quillRef = useRef(null);
   const handleSwitchChange = (event) => {
     setIsChecked(!isChecked);
@@ -33,11 +35,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
   const [value, setValue] = useState("");
   const modules = {
     toolbar: [
-      [
-        { header: "1" },
-        { header: "2" },
-        { font: [] },
-      ],
+      [{ header: "1" }, { header: "2" }, { font: [] }],
       [{ size: [] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
       [
@@ -78,7 +76,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
 
   const deleteSectionAction = () => {
     deleteSectionRequest();
-  }
+  };
   const deleteSectionRequest = async () => {
     var data = {
       id: editableSection ? editableSection.id : null,
@@ -99,6 +97,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
       setSection(editableSection.sectionName);
       setSectionDesc(editableSection.sectionDesc);
       setValue(editableSection.passage);
+      setIndex(editableSection.sectionIndex);
     }
   }, [editableSection]);
 
@@ -109,6 +108,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
       context: context,
       isChecked: isChecked,
       contentId: content.id,
+      index:index
     };
     if (editableSection) {
       data.sectionId = editableSection.id;
@@ -123,6 +123,9 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
     } catch (error) {
       console.error(error);
     }
+  };
+  const setIndexChance = (e) => {
+    setIndex(e.target.value);
   };
 
   return (
@@ -146,30 +149,37 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
             {content.name}
           </Typography>
           {editableSection && (
-            <IconButton onClick={() => deleteSectionAction()} aria-label="delete" size="large">
+            <IconButton
+              onClick={() => deleteSectionAction()}
+              aria-label="delete"
+              size="large"
+            >
               <DeleteIcon sx={{ color: "white" }} fontSize="inherit" />
             </IconButton>
           )}
-          {(content.contentMyRole != "VIEWER" && content.createdBy.id === getUserCurrentId()) && (
-          <FormControlLabel
-            sx={{ marginTop: "7px", marginRight: "20px" }}
-            control={
-              <Switch
-                checked={isChecked}
-                onChange={handleSwitchChange}
-                color="primary"
-                sx={{
-                  "& .MuiSwitch-switchBase.Mui-checked": {
-                    color: "green",
-                  },
-                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                    backgroundColor: "lightgreen",
-                  },
-                }}
+          {content.contentMyRole !== "VIEWER" &&
+            content.createdBy.id === getUserCurrentId() && (
+              <FormControlLabel
+                sx={{ marginTop: "7px", marginRight: "20px" }}
+                control={
+                  <Switch
+                    checked={isChecked}
+                    onChange={handleSwitchChange}
+                    color="primary"
+                    sx={{
+                      "& .MuiSwitch-switchBase.Mui-checked": {
+                        color: "green",
+                      },
+                      "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                        {
+                          backgroundColor: "lightgreen",
+                        },
+                    }}
+                  />
+                }
+                label="Publish when saved!"
               />
-            }
-            label="Publish when saved!"
-          />)}
+            )}
           <Button
             autoFocus
             color="inherit"
@@ -183,10 +193,21 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
       </AppBar>
       <Box sx={{ display: "flex", padding: "10px", marginTop: "10px" }}>
         <TextField
+          onChange={setIndexChance}
+          fullWidth
+          sx={{
+            width: "80px",
+            marginRight: "10px",
+          }}
+          value={index}
+          label="Index"
+          id="index"
+        />
+        <TextField
           onChange={setSectionChange}
           fullWidth
           sx={{
-            flex: "1",
+            flex: "4",
             marginRight: "10px",
           }}
           value={section}
@@ -197,7 +218,7 @@ const AddSection = ({ open, onClose, content, editableSection }) => {
           onChange={setSectionDescChange}
           fullWidth
           sx={{
-            flex: "2",
+            flex: "7",
           }}
           value={sectionDesc}
           label="Description (Optional)"

@@ -334,3 +334,51 @@ input:focus {
   margin: 10px;
   font-size: 11px;
 }
+
+.select-item .select__menu {
+  z-index: 9999;
+}
+
+
+.create-content,
+.selects {
+  transition: all 0.3s ease;
+}
+
+.collapsed {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+#editorjs.full-width {
+  width: 100%;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.divider {
+  width: 90%;
+  height: 2px;
+  background-color: #ddd;
+  margin-right: 10px;
+}
+
+.toggle-button {
+  padding: 0;
+  min-width: 30px;
+  min-height: 30px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background-color: rgba(25, 118, 210, 0.04) !important;
+  font-size: 18px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+}

@@ -84,7 +84,6 @@ const ContentDetail = () => {
   const [switchStates, setSwitchStates] = useState({});
   const [notes, setNotes] = useState([]);
   const [editableSection, setEditableSection] = useState(null);
-  const [combinedPassages, setCombinedPassages] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(false);
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -163,7 +162,6 @@ const ContentDetail = () => {
           return acc;
         }, {});
         setSwitchStates(initialSwitchStates);
-        //combinePassages(result.response);
       }
     } catch (error) {
       console.error(error);
@@ -190,17 +188,7 @@ const ContentDetail = () => {
       console.log(err);
     }
   };
-  /*
-  const combinePassages = (passages) => {
-    const combined = passages
-      .map((passage, index) => {
-        return `<h2>${passage.sectionName}</h2><p>${passage.passage}</p>`;
-      })
-      .join("");
 
-    setCombinedPassages(combined);
-  };
-*/
   const handleSwitchChange = async (event, id) => {
     const newState = !switchStates[id];
     setSwitchStates((prevStates) => ({

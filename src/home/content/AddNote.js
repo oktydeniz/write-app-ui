@@ -103,7 +103,7 @@ const AddNote = ({ edit, content, trigger, handleClose, open }) => {
       formData.append("file", file);
 
       try {
-        const response = await fetch(PUBLIC_URL + "/v1/files/upload", {
+        const response = await fetch(PUBLIC_URL + "/v1/files/upload-native", {
           method: "POST",
           body: formData,
         });

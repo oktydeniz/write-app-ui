@@ -10,6 +10,7 @@ import { truncateText } from "utils/StringUtil";
 
 const Contents = () => {
   const [contents, setContents] = useState([]);
+  const [myPapers, setMyPapers] = useState([]);
   const [sharedWithMe, setSharedWithMe] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
@@ -19,6 +20,7 @@ const Contents = () => {
         if (result.success) {
           setSharedWithMe(result.sharedWithMe);
           setContents(result.contents);
+          setMyPapers(result.papers);
         }
       } catch (error) {
         console.error(error);
@@ -36,7 +38,7 @@ const Contents = () => {
   };
 
   return (
-    <>
+    <Box>
       <div className="contents-container">
         {contents.length > 0 ? (
           <>
@@ -198,11 +200,19 @@ const Contents = () => {
           ))}
         </Box>
       </div>
-
-      {
-        sharedWithMe.length <1 && contents.length < 1 && <p className="no-data-p">You Don't have content yet!</p>
-      }
-    </>
+      <div className="contents-container">
+        <Box className="contents-lists">
+          {myPapers.map((p) => (
+            <Box>{p.content}</Box>
+          ))}
+        </Box>
+      </div>
+      {sharedWithMe.length < 1 &&
+        myPapers.length < 1 &&
+        contents.length < 1 && (
+          <p className="no-data-p">You Don't have content yet!</p>
+        )}
+    </Box>
   );
 };
 
