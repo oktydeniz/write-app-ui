@@ -32,6 +32,9 @@ const Contents = () => {
   const handleCardClick = (name) => {
     navigate(`/content/${name}`);
   };
+  const handleCardClickPaper= (paper, user) => {
+    navigate(`/contents/papers/${paper}`);
+  }
   const showAll = (type) => {
     var section = type === 0 ? "my-contents" : "shared-with-me";
     navigate(`/contents/${section}`);
@@ -73,9 +76,6 @@ const Contents = () => {
                   <Grid container justifyContent="space-between">
                     <Typography variant="body2" color="text.secondary">
                       {`${item.genre.label} - ${item.clickedCount} clicks`}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.price ? `${item.price} ${item.currency} ` : "Free"}
                     </Typography>
                   </Grid>
                   <Typography variant="h6" component="div">
@@ -155,9 +155,6 @@ const Contents = () => {
                     <Typography variant="body2" color="text.secondary">
                       {`${item.genre.label} - ${item.clickedCount} clicks`}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.price ? `${item.price} ${item.currency} ` : "Free"}
-                    </Typography>
                   </Grid>
                   <Typography variant="h6" component="div">
                     {item.name}
@@ -201,9 +198,69 @@ const Contents = () => {
         </Box>
       </div>
       <div className="contents-container">
+      {myPapers.length > 0 ? (
+          <>
+            <span>My Papers</span>
+            <span onClick={() => showAll(2)} className="show-all">
+              Show All
+            </span>
+          </>
+        ) : null}
         <Box className="contents-lists">
-          {myPapers.map((p) => (
-            <Box>{p.content}</Box>
+          {myPapers.map((item) => (
+            <Box key={item.id}>
+              <Card
+                onClick={() => handleCardClickPaper(item.slug, item.user.userAppName)}
+                key={item.slug}
+                className="content-card"
+                sx={{
+                  display: "flex",
+                  maxWidth: 450,
+                  margin: "10px",
+                  height: "250px;",
+                  alignItems: "center;",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  sx={{ width: 140, height: "200px;", borderRadius: "10px;" }}
+                  image={item.img}
+                  alt={item.name}
+                />
+
+                <Grid container>
+                  <Grid item xs={12} sx={{ padding: 2 }}>
+                    <Grid container justifyContent="space-between">
+                      <Typography variant="body2" color="text.secondary">
+                        {`${item.genre.label} - ${item.clickedCount} clicks`}
+                      </Typography>
+                    </Grid>
+                    <Typography variant="h6" component="div">
+                      {item.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {truncateText(item.desc, 255)}
+                    </Typography>
+
+                    <Grid container spacing={1} sx={{ marginTop: 1 }}>
+                      {item.tags.slice(0, 3).map((tag, index) => (
+                        <Chip
+                          sx={{ margin: "3px" }}
+                          label={tag.label}
+                          key={index}
+                          size="small"
+                        />
+                      ))}
+                      {item.tags.length > 3 && (
+                        <Typography variant="caption" color="text.secondary">
+                          ...
+                        </Typography>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Card>
+            </Box>
           ))}
         </Box>
       </div>

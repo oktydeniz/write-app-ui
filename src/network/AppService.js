@@ -20,6 +20,15 @@ export const savePaperData = (req) => {
   });
 };
 
+
+export const getPageBySlug = (slug) => {
+  return baseFetch(`/papers/${slug}`, { method: 'GET'})
+}
+
+export const getPageByUser = (slug, user) => {
+  return baseFetch(`/papers/find/${user}/${slug}`, { method: 'GET'})
+}
+
 const baseFetch = async (endpoint, options) => {
     try {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -31,7 +40,6 @@ const baseFetch = async (endpoint, options) => {
           ...options.headers,
         },
       });
-      debugger;
       const data = await response.json();
       if (!response.ok) {
         return { success: false, message: data.message || "Request failed" };

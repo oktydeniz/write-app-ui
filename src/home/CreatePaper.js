@@ -36,7 +36,7 @@ import { getSubGenres } from "network/ContentService";
 import { handleUploadNativeFile } from "network/AppService";
 import { savePaperData } from "network/AppService";
 
-const CreatePaper = ({ openPaper, handleClose, paper }) => {
+const CreatePaper = ({ openPaper, handleClose}) => {
   const [errorText, setErrorText] = useState(null);
   const editorRef = useRef(null);
   const [editor, setEditor] = useState(null);

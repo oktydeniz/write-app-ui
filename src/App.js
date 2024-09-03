@@ -12,6 +12,7 @@ import ContentDetail from 'home/content/ContentDetail';
 import Notification from 'home/Notification';
 import Message from 'home/Message';
 import ContentsByTypes from 'home/content/ContentsByTypes';
+import PageDetail from 'home/PageDetail';
 
 const App = () => {
  
@@ -30,6 +31,7 @@ const App = () => {
                 <Route path="/home" element={<Home />} />
                 <Route path="/contents" element={<Contents />} />[
                 <Route path="/contents/:contentType" element={<ContentsByTypes />} />
+                <Route path="/contents/papers/:paperSlug" element={<PageDetail/>} />
                 <Route path="/content/:contentSlug" element={<ContentDetail />} />]
                 <Route path="/activities" element={<Home />} />
                 <Route path="/publication" element={<Home />} />
