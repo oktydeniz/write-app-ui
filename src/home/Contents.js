@@ -32,9 +32,9 @@ const Contents = () => {
   const handleCardClick = (name) => {
     navigate(`/content/${name}`);
   };
-  const handleCardClickPaper= (paper, user) => {
+  const handleCardClickPaper = (paper, user) => {
     navigate(`/contents/papers/${paper}`);
-  }
+  };
   const showAll = (type) => {
     var section = type === 0 ? "my-contents" : "shared-with-me";
     navigate(`/contents/${section}`);
@@ -198,7 +198,7 @@ const Contents = () => {
         </Box>
       </div>
       <div className="contents-container">
-      {myPapers.length > 0 ? (
+        {myPapers.length > 0 ? (
           <>
             <span>My Papers</span>
             <span onClick={() => showAll(2)} className="show-all">
@@ -210,7 +210,9 @@ const Contents = () => {
           {myPapers.map((item) => (
             <Box key={item.id}>
               <Card
-                onClick={() => handleCardClickPaper(item.slug, item.user.userAppName)}
+                onClick={() =>
+                  handleCardClickPaper(item.slug, item.user.userAppName)
+                }
                 key={item.slug}
                 className="content-card"
                 sx={{
@@ -221,13 +223,14 @@ const Contents = () => {
                   alignItems: "center;",
                 }}
               >
-                <CardMedia
-                  component="img"
-                  sx={{ width: 140, height: "200px;", borderRadius: "10px;" }}
-                  image={item.img}
-                  alt={item.name}
-                />
-
+                {item.img && (
+                  <CardMedia
+                    component="img"
+                    sx={{ width: 140, height: "200px;", borderRadius: "10px;" }}
+                    image={item.img}
+                    alt={item.name}
+                  />
+                )}
                 <Grid container>
                   <Grid item xs={12} sx={{ padding: 2 }}>
                     <Grid container justifyContent="space-between">

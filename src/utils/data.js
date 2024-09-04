@@ -12,63 +12,68 @@ export const currencies = [
     label: "TRY - Turkish Lira - ₺",
   },
 ];
-
 export const languages = [
-  {
-    value: "NULL",
-    label: "Select",
+{
+    value: "TR",
+    label: "Türkçe",
+    tag: "tr-TR",
   },
-    {
-      value: "TR",
-      label: "Türkçe",
-    },
-    {
-      value: "EN",
-      label: "English",
-    },
-    {
-      value: "FR",
-      label: "Français",
-    },
-    {
-      value: "ES",
-      label: "Español",
-    },
-    {
-      value: "DE",
-      label: "Deutsch",
-    },
-    {
-      value: "RU",
-      label: "Русский",
-    },
-  ];
-
-
-export function getCurrency(str){
-
-  if (str === "USD"){
+  {
+    value: "EN",
+    label: "English",
+    tag: "en-US",
+  },
+  {
+    value: "FR",
+    label: "Français",
+    tag: "fr-FR",
+  },
+  {
+    value: "ES",
+    label: "Español",
+    tag: "es-ES",
+  },
+  {
+    value: "DE",
+    label: "Deutsch",
+    tag: "de-DE",
+  },
+  {
+    value: "RU",
+    label: "Русский",
+    tag: "ru-RU",
+  },
+];
+export function getCurrency(str) {
+  if (str === "USD") {
     return 0;
-  }else if (str === "TRY"){
+  } else if (str === "TRY") {
     return 1;
-  }else {
+  } else {
     return 2;
   }
 }
 
-
 export const getCopyrightDesc = (value) => {
-   switch(value){
-    case 1: return "You state that your work cannot be used or adapted in any way without your permission. (All rights reserved.)";
-    case 2: return "If you choose this option, you allow anyone to freely use your story for any purpose. They can print, sell, or even make a movie out of it. (Public Domain)";
-    case 3: return "You retain some rights to your story, but you allow others to translate or adapt it as long as they credit you as the original author.";
-    case 4: return "By choosing this option, you allow others to edit, adapt, and build upon your story for non-commercial purposes, as long as they credit you as the original author.";
-    case 5: return "If you choose this option, you allow your story to be shared without any modifications, as long as they credit you as the original author.";
-    case 6: return "If you choose this option, you allow others to adapt and build upon your story for non-commercial purposes, as long as they credit you and share their new creations under the same license terms.";
-    case 7: return "If you choose this option, you allow your story to be adapted and built upon for any purpose, including commercial use, as long as they credit you and share their new creations under the same license terms.";
-    case 8: return "If you choose this option, you allow your story to be used for any purpose without any modifications, as long as they credit you as the original author.";
-   }
-}
+  switch (value) {
+    case 1:
+      return "You state that your work cannot be used or adapted in any way without your permission. (All rights reserved.)";
+    case 2:
+      return "If you choose this option, you allow anyone to freely use your story for any purpose. They can print, sell, or even make a movie out of it. (Public Domain)";
+    case 3:
+      return "You retain some rights to your story, but you allow others to translate or adapt it as long as they credit you as the original author.";
+    case 4:
+      return "By choosing this option, you allow others to edit, adapt, and build upon your story for non-commercial purposes, as long as they credit you as the original author.";
+    case 5:
+      return "If you choose this option, you allow your story to be shared without any modifications, as long as they credit you as the original author.";
+    case 6:
+      return "If you choose this option, you allow others to adapt and build upon your story for non-commercial purposes, as long as they credit you and share their new creations under the same license terms.";
+    case 7:
+      return "If you choose this option, you allow your story to be adapted and built upon for any purpose, including commercial use, as long as they credit you and share their new creations under the same license terms.";
+    case 8:
+      return "If you choose this option, you allow your story to be used for any purpose without any modifications, as long as they credit you as the original author.";
+  }
+};
 
 export const selectOptionsForAuthorType = [
   /*{
@@ -79,14 +84,14 @@ export const selectOptionsForAuthorType = [
   {
     value: 1,
     label: "Writer",
-    role:"WRITER"
+    role: "WRITER",
   },
   {
     value: 2,
     label: "Viewer",
-    role:"VIEWER"
+    role: "VIEWER",
   },
-]
+];
 /*
 
 1. All Rights Reserved

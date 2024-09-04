@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import EditorJS from "@editorjs/editorjs";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
-import { Grid, Button, Box, TextField } from "@mui/material";
+import { Grid, Button, Box, TextField, Input } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { PUBLIC_URL } from "network/Constant";
+import { PUBLIC_URL, getUserLanguage } from "network/Constant";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import "assets/style/main.scss";
 import Select from "react-select";
 import { getUserCurrentId } from "network/Constant";
@@ -13,7 +14,12 @@ import Checklist from "@editorjs/checklist";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import Paragraph from "@editorjs/paragraph";
-import { getPageBySlug } from "network/AppService";
+import {
+  deletePaper,
+  getPageBySlug,
+  handleUploadNativeFile,
+  updatePaperData,
+} from "network/AppService";
 import Quote from "@editorjs/quote";
 import Warning from "@editorjs/warning";
 import Marker from "@editorjs/marker";
@@ -26,25 +32,43 @@ import Table from "@editorjs/table";
 import ImageTool from "@editorjs/image";
 import { getSubGenres } from "network/ContentService";
 import { sendGETRequestWithToken } from "network/PublicService";
+import { languages } from "utils/data";
 
 const PageDetail = () => {
+  const navigate = useNavigate();
+  const [errorText, setErrorText] = useState(null);
   const [editor, setEditor] = useState(null);
   const { paperSlug } = useParams();
   const editorRef = useRef();
   const [paper, setPaper] = useState(null);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [img, setImg] = useState("");
-
+  const [publish, setPublish] = useState(false);
   const [tags, setTags] = useState([]);
   const [genre, setGenre] = useState();
   const [listGenres, setListGenres] = useState([]);
   const [listTags, setListTags] = useState([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const [file, setFile] = useState(null);
+  const [paperContent, setPaperContent] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFile(file);
+      setImageSrc(URL.createObjectURL(file));
+    }
+  };
+
+  const handleChangePublish = (e) => {
+    setPublish(e.target.value);
+  };
 
   const handleChangeForGenre = (selectedOption) => {
     if (selectedOption && selectedOption.value) {
-      setGenre(selectedOption.value);
+      setGenre(selectedOption);
       fetchTagData(selectedOption.value);
     } else {
       setListTags([]);
@@ -59,10 +83,10 @@ const PageDetail = () => {
       if (result.success) {
         setListGenres(result.response);
         const selectedOption = result.response.find(
-            (genre) => genre.value === paper.genre.value
-          );
-          setGenre(selectedOption);
-          fetchTagData(paper.genre.value);
+          (genre) => genre.value === paper.genre.value
+        );
+        setGenre(selectedOption);
+        fetchTagData(paper.genre.value, paper.tags);
       }
     } catch (e) {
       console.log(e);
@@ -73,13 +97,21 @@ const PageDetail = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const fetchTagData = async (genre) => {
+  const handleChangeForLanguage = (value) => {
+    if (value) {
+      setSelectedLanguage(value.value);
+    } else {
+      setSelectedLanguage("EN");
+    }
+  };
+  const fetchTagData = async (genre, tags) => {
     setTags([]);
     setListTags([]);
     try {
       const result = await getSubGenres(genre);
       if (result.success) {
         setListTags(result.response);
+        setTags(tags);
       }
     } catch (error) {
       console.error(error);
@@ -90,17 +122,82 @@ const PageDetail = () => {
     setTags(selectedOption.map((item) => item.value));
   };
 
+  function extractValues(tags) {
+    if (Array.isArray(tags)) {
+      // Eğer tags bir dizi ise
+      if (tags.length > 0 && typeof tags[0] === 'object' && tags[0] !== null && 'value' in tags[0]) {
+        // Dizi nesnelerden oluşuyorsa
+        return tags.map(t => t.value);
+      } else {
+        // Dizi basit değerlerden oluşuyorsa
+        return tags;
+      }
+    } else {
+      // Eğer tags bir dizi değilse (bu durumda bir dizi bekleniyor ama yine de kontrol etmek iyi olabilir)
+      return [];
+    }
+  }
+
   const handleEditForPaper = async () => {
     if (editor) {
       try {
         const savedData = await editor.save();
         const jsonData = JSON.stringify(savedData);
-        console.log(jsonData);
+
+        var data = {
+          name: name,
+          id: paper.id,
+          desc: desc,
+          genre: genre.value,
+          tags: extractValues(tags),
+          content: jsonData,
+          language: selectedLanguage.value ? selectedLanguage.value : selectedLanguage,
+          publish: publish,
+        };
+        if (file) {
+          handleUploadNativeFile(
+            file,
+            (filePath) => {
+              data.img = filePath;
+              savePage(data);
+            },
+            (error) => {
+              setErrorText(error);
+            }
+          );
+        } else {
+          savePage(data);
+        }
       } catch (error) {
         console.error("Saving failed:", error);
       }
     }
   };
+
+  const savePage = async (page) => {
+    try {
+      const result = await updatePaperData(page);
+      if (result.success) {
+        navigate("/contents");
+      } else {
+        setErrorText(result.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeleteForPaper = async () => {
+    try {
+      const response = await deletePaper(paper.id);
+      if (response.success) {
+        navigate("/contents");
+      }
+    } catch (e) {
+      setErrorText(e);
+    }
+  };
+
   const fetchPage = async () => {
     setPaper(null);
     try {
@@ -109,8 +206,13 @@ const PageDetail = () => {
         const fetchedData = response.data;
         setPaper(fetchedData);
         setName(fetchedData.name);
+        setPaperContent(fetchedData.content);
+        const languageObject = languages.find(lang => lang.value === (fetchedData.language || getUserLanguage()));
+        setSelectedLanguage(languageObject);
         setDesc(fetchedData.desc);
-        setImg(fetchedData.img);
+        setImageSrc(
+          fetchedData.img ? fetchedData.img : "https://via.placeholder.com/150"
+        );
         fetchGenre(fetchedData);
       }
     } catch (e) {
@@ -153,7 +255,7 @@ const PageDetail = () => {
             inlineToolbar: true,
           },
         },
-        data: {
+        data: JSON.parse(paper.content) || {
           time: new Date().getTime(),
           blocks: [
             {
@@ -206,16 +308,48 @@ const PageDetail = () => {
               width: "100%",
             }}
           >
-            {paper.img && (
-              <CardMedia
-                component="img"
-                sx={{ width: 140, maxHeight: "200px" }}
-                image={paper.img}
-                alt={paper.name}
-              />
+            {imageSrc && (
+              <Box>
+                <CardMedia
+                  component="img"
+                  sx={{ width: 140, maxHeight: "200px" }}
+                  image={imageSrc}
+                  alt={paper.name}
+                />
+                <label htmlFor="file-input">
+                  <Input
+                    accept="image/*"
+                    id="file-input"
+                    type="file"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                  <Button
+                    variant="contained"
+                    component="span"
+                    sx={{
+                      height: "40px",
+                      marginTop: "4px !important",
+                      padding: "7px !important",
+                    }}
+                    startIcon={<AttachFileIcon />}
+                  >
+                    Select Image
+                  </Button>
+                </label>
+              </Box>
             )}
             <Grid container>
               <Grid item={true} content="true" xs={12} sx={{ padding: 2 }}>
+                {errorText != null && (
+                  <Typography
+                    variant="body2"
+                    color="red"
+                    sx={{ fontSize: "15px", margin: "10px" }}
+                  >
+                    {errorText}
+                  </Typography>
+                )}
                 <Grid container justifyContent="space-between">
                   <TextField
                     sx={{
@@ -230,13 +364,24 @@ const PageDetail = () => {
                     id="name"
                   />
                   {paper.user.id === getUserCurrentId() ? (
-                    <Button
-                      onClick={() => handleEditForPaper()}
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      Edit
-                    </Button>
+                    <Box>
+                      <Button
+                        sx={{
+                          color: "red",
+                        }}
+                        onClick={() => handleDeleteForPaper()}
+                        variant="body2"
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        onClick={() => handleEditForPaper()}
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        Save
+                      </Button>
+                    </Box>
                   ) : null}
                 </Grid>
                 <Box
@@ -272,14 +417,15 @@ const PageDetail = () => {
             flexDirection: "row",
             justifyContent: "flex-start",
             display: "flex",
+            alignItems: "center",
           }}
         >
-          <div className="select-item horizontal">
+          <div className="select-item horizontal flex1">
             <div className="item-span">Category</div>
             <Select
               className="basic-single"
               classNamePrefix="select"
-              defaultValue={genre}
+              value={genre}
               isSearchable={true}
               onChange={handleChangeForGenre}
               options={listGenres}
@@ -301,7 +447,7 @@ const PageDetail = () => {
           </div>
           <br />
           {listTags.length > 0 && (
-            <div className="select-item horizontal">
+            <div className="select-item horizontal flex2">
               <div className="item-span">Tags</div>
               <Select
                 className="basic-single"
@@ -330,6 +476,32 @@ const PageDetail = () => {
               />
             </div>
           )}
+          <div className="select-item flex1">
+            <div className="item-span">Language</div>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              defaultValue={selectedLanguage}
+              isClearable={true}
+              isSearchable={true}
+              onChange={handleChangeForLanguage}
+              options={languages}
+              name=".contents"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  minHeight: "55px",
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  display: "flex",
+                  alignItems: "center",
+                }),
+              }}
+            />
+          </div>
         </Box>
       )}
 

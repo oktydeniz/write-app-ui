@@ -5,7 +5,7 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import "assets/style/main.scss";
 import Paragraph from "@editorjs/paragraph";
-import { PUBLIC_URL } from "network/Constant";
+import { PUBLIC_URL, getUserLanguage } from "network/Constant";
 import Checklist from "@editorjs/checklist";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { sendGETRequestWithToken } from "network/PublicService";
@@ -35,8 +35,10 @@ import ImageTool from "@editorjs/image";
 import { getSubGenres } from "network/ContentService";
 import { handleUploadNativeFile } from "network/AppService";
 import { savePaperData } from "network/AppService";
+import { languages } from "utils/data";
 
-const CreatePaper = ({ openPaper, handleClose}) => {
+
+const CreatePaper = ({ openPaper, handleClose }) => {
   const [errorText, setErrorText] = useState(null);
   const editorRef = useRef(null);
   const [editor, setEditor] = useState(null);
@@ -49,14 +51,14 @@ const CreatePaper = ({ openPaper, handleClose}) => {
   const [subGenres, setSubGenres] = useState([]);
   const [genres, setGenres] = useState("");
   const [publish, setPublish] = useState(false);
-
+  const [selectedLanguage, setSelectedLanguage] = useState(getUserLanguage);
   const handleNameChange = (e) => {
     setName(e.target.value);
   };
 
   const handleChangePublish = (e) => {
     setPublish(e.target.value);
-  }
+  };
   const handleAboutChange = (e) => {
     setDesc(e.target.value);
   };
@@ -115,6 +117,14 @@ const CreatePaper = ({ openPaper, handleClose}) => {
     if (file) {
       setFile(file);
       setImageSrc(URL.createObjectURL(file));
+    }
+  };
+
+  const handleChangeForLanguage = (value) => {
+    if (value) {
+      setSelectedLanguage(value.value);
+    } else {
+      setSelectedLanguage("EN");
     }
   };
 
@@ -183,24 +193,37 @@ const CreatePaper = ({ openPaper, handleClose}) => {
         const savedData = await editor.save();
         const jsonData = JSON.stringify(savedData);
 
-        handleUploadNativeFile(
-          file,
-          (filePath) => {
-            var data = {
-              name: name,
-              desc: desc,
-              img:filePath,
-              genre: selectedGenre,
-              tags: selectedSubGenre,
-              content: jsonData,
-              publish:publish
-            };
-            savePage(data);
-          },
-          (error) => {
-            setErrorText(error);
-          }
-        );
+        if (file) {
+          handleUploadNativeFile(
+            file,
+            (filePath) => {
+              var data = {
+                name: name,
+                desc: desc,
+                img: filePath,
+                genre: selectedGenre,
+                tags: selectedSubGenre,
+                content: jsonData,
+                publish: publish,
+              };
+              savePage(data);
+            },
+            (error) => {
+              setErrorText(error);
+            }
+          );
+        } else {
+          var data = {
+            name: name,
+            desc: desc,
+            img: null,
+            genre: selectedGenre,
+            tags: selectedSubGenre,
+            content: jsonData,
+            publish: publish,
+          };
+          savePage(data);
+        }
       } catch (error) {
         console.error("Saving failed:", error);
       }
@@ -211,15 +234,15 @@ const CreatePaper = ({ openPaper, handleClose}) => {
     try {
       const result = await savePaperData(page);
       if (result.success) {
-          clearAll();
+        clearAll();
         handleClose();
       } else {
         setErrorText(result.message);
       }
-    }catch (error) {
+    } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const clearAll = () => {
     setName("");
@@ -230,7 +253,7 @@ const CreatePaper = ({ openPaper, handleClose}) => {
     setSelectedGenre(null);
     setSelectedSubGenre([]);
     setSubGenres([]);
-  }
+  };
 
   return (
     <Dialog
@@ -258,121 +281,92 @@ const CreatePaper = ({ openPaper, handleClose}) => {
         </Toolbar>
       </AppBar>
       <div className="create-base-content">
-      <div className={`create-content ${isCollapsed ? "collapsed" : ""}`}>
-        <Box className="select-img-container" sx={{ padding: 2 }}>
-          <Input
-            accept="image/*"
-            id="file-input"
-            type="file"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-          />
-          {imageSrc && (
-            <Box
-              sx={{
-                marginTop: 2,
-                display: "flex",
-                justifyContent: "center",
-                border: "1px solid #ddd",
-                borderRadius: 1,
-                overflow: "hidden",
-                maxWidth: 250,
-                borderRadius: "12px",
-                maxHeight: 450,
-              }}
-            >
-              <img
-                src={imageSrc}
-                alt="Selected"
-                style={{ width: "100%", height: "250px" }}
-              />
-            </Box>
-          )}
-          <label htmlFor="file-input">
-            <Button
-              variant="contained"
-              component="span"
-              startIcon={<AttachFileIcon />}
-            >
-              Select Image
-            </Button>
-          </label>
-        </Box>
-        {!isCollapsed && (
-          <div className="content-names-container">
-            {errorText != null && (
-              <Typography
-                variant="body2"
-                color="red"
-                sx={{ fontSize: "15px", margin: "10px" }}
-              >
-                {errorText}
-              </Typography>
-            )}
-            <TextField
-              className="name"
-              onChange={handleNameChange}
-              fullWidth
-              required
-              value={name}
-              label="Name"
-              id="name"
+        <div className={`create-content ${isCollapsed ? "collapsed" : ""}`}>
+          <Box className="select-img-container" sx={{ padding: 2 }}>
+            <Input
+              accept="image/*"
+              id="file-input"
+              type="file"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
             />
-            <TextField
-              id="desc"
-              label="Description"
-              multiline
-              fullWidth
-              required
-              value={desc}
-              onChange={handleAboutChange}
-              rows={6}
-            />
-          </div>
-        )}
-      </div>
-      <div className={`selects ${isCollapsed ? "collapsed" : ""}`}>
-        {!isCollapsed && (
-          <>
-            <div className="select-item">
-              <div className="item-span">Category</div>
-              <Select
-                className="basic-single"
-                classNamePrefix="select"
-                defaultValue={{ value: -22, label: "Select" }}
-                isSearchable={true}
-                onChange={handleChangeForGenre}
-                options={genres}
-                name=".contents"
-                styles={{
-                  control: (provided) => ({
-                    ...provided,
-                    height: "55px",
-                    minHeight: "55px",
-                  }),
-                  valueContainer: (provided) => ({
-                    ...provided,
-                    height: "55px",
-                    display: "flex",
-                    alignItems: "center",
-                  }),
+            {imageSrc && (
+              <Box
+                sx={{
+                  marginTop: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  overflow: "hidden",
+                  maxWidth: 250,
+                  borderRadius: "12px",
+                  maxHeight: 450,
                 }}
+              >
+                <img
+                  src={imageSrc}
+                  alt="Selected"
+                  style={{ width: "100%", height: "250px" }}
+                />
+              </Box>
+            )}
+            <label htmlFor="file-input">
+              <Button
+                variant="contained"
+                component="span"
+                startIcon={<AttachFileIcon />}
+              >
+                Select Image
+              </Button>
+            </label>
+          </Box>
+          {!isCollapsed && (
+            <div className="content-names-container">
+              {errorText != null && (
+                <Typography
+                  variant="body2"
+                  color="red"
+                  sx={{ fontSize: "15px", margin: "10px" }}
+                >
+                  {errorText}
+                </Typography>
+              )}
+              <TextField
+                className="name"
+                onChange={handleNameChange}
+                fullWidth
+                required
+                value={name}
+                label="Name"
+                id="name"
+              />
+              <TextField
+                id="desc"
+                label="Description"
+                multiline
+                fullWidth
+                required
+                value={desc}
+                onChange={handleAboutChange}
+                rows={6}
               />
             </div>
-            <br />
-            {subGenres.length > 0 && (
+          )}
+        </div>
+        <div className={`selects ${isCollapsed ? "collapsed" : ""}`}>
+          {!isCollapsed && (
+            <>
               <div className="select-item">
-                <div className="item-span">Tags</div>
+                <div className="item-span">Category</div>
                 <Select
                   className="basic-single"
                   classNamePrefix="select"
-                  isClearable={true}
-                  isMulti
+                  defaultValue={{ value: -22, label: "Select" }}
                   isSearchable={true}
-                  closeMenuOnSelect={false}
-                  onChange={handleChangeForSubGenre}
-                  options={subGenres}
-                  name="tags"
+                  onChange={handleChangeForGenre}
+                  options={genres}
+                  name=".contents"
                   styles={{
                     control: (provided) => ({
                       ...provided,
@@ -388,18 +382,76 @@ const CreatePaper = ({ openPaper, handleClose}) => {
                   }}
                 />
               </div>
-            )}
-          </>
-        )}
+              <br />
+              {subGenres.length > 0 && (
+                <div className="select-item">
+                  <div className="item-span">Tags</div>
+                  <Select
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isClearable={true}
+                    isMulti
+                    isSearchable={true}
+                    closeMenuOnSelect={false}
+                    onChange={handleChangeForSubGenre}
+                    options={subGenres}
+                    name="tags"
+                    styles={{
+                      control: (provided) => ({
+                        ...provided,
+                        height: "55px",
+                        minHeight: "55px",
+                      }),
+                      valueContainer: (provided) => ({
+                        ...provided,
+                        height: "55px",
+                        display: "flex",
+                        alignItems: "center",
+                      }),
+                    }}
+                  />
+                </div>
+              )}
+               <div className="select-item flex1">
+            <div className="item-span">Language</div>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              defaultValue={selectedLanguage}
+              isClearable={true}
+              isSearchable={true}
+              onChange={handleChangeForLanguage}
+              options={languages}
+              name=".contents"
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  minHeight: "55px",
+                }),
+                valueContainer: (provided) => ({
+                  ...provided,
+                  height: "55px",
+                  display: "flex",
+                  alignItems: "center",
+                }),
+              }}
+            />
+          </div>
+            </>
+          )}
+        </div>
+        <div className="toggle-container">
+          <div className="divider"></div>
+          <Button onClick={toggleCollapse} className="toggle-button">
+            {isCollapsed ? "↓" : "↑"}
+          </Button>
+        </div>
+        <div
+          id="editorjs"
+          className={`${isCollapsed ? "full-width" : ""}`}
+        ></div>
       </div>
-      <div className="toggle-container">
-        <div className="divider"></div>
-        <Button onClick={toggleCollapse} className="toggle-button">
-          {isCollapsed ? "↓" : "↑"}
-        </Button>
-      </div>
-      <div id="editorjs" className={`${isCollapsed ? "full-width" : ""}`}></div>
-    </div>
     </Dialog>
   );
 };

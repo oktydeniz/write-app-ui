@@ -212,15 +212,6 @@ const ContentDetail = () => {
     setEditableSection(item);
     handleClickOpen();
   };
-  const [showReader, setShowReader] = useState(false);
-
-  const handleReadClick = () => {
-    setShowReader(true);
-  };
-
-  const handleCloseReader = () => {
-    setShowReader(false);
-  };
   const handleClickOpenContent = () => {
     setContentDialog(true);
   };
@@ -295,20 +286,6 @@ const ContentDetail = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Fab
-              sx={{
-                position: "absolute !important",
-                bottom: "10px",
-                right: "10px",
-              }}
-              className="floating-btn-read"
-              onClick={handleReadClick}
-              size="small"
-              color="primary"
-              aria-label="read"
-            >
-              <MenuBookIcon />
-            </Fab>
           </Card>
           <AddContent
             open={openContentdialog}
@@ -335,15 +312,6 @@ const ContentDetail = () => {
             <CustomTabPanel value={value} index={0}>
               {passages.length > 0 ? (
                 <>
-                  {showReader && (
-                    <FullScreenReader
-                      content={contentSlug}
-                      open={showReader}
-                      creator={content.createdBy.userAppName}
-                      handleClose={handleCloseReader}
-                    />
-                  )}
-
                   {passages.map((item, index) => (
                     <Accordion
                       key={index}
