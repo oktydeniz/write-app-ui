@@ -13,6 +13,7 @@ import Notification from 'home/Notification';
 import Message from 'home/Message';
 import ContentsByTypes from 'home/content/ContentsByTypes';
 import PageDetail from 'home/PageDetail';
+import BookDetail from 'home/pages/book/BookDetail';
 
 const App = () => {
  
@@ -28,7 +29,9 @@ const App = () => {
             <Route path="/" element={<PrivateRoute />}>
               <Route element={<Layout />}>
                 <Route index element={<Home />} />
-                <Route path="/home" element={<Home />} />
+                <Route path="/home" element={<Home />} />[
+                  <Route path="/home/:user/:slug" element={<BookDetail/>} />
+                ]
                 <Route path="/contents" element={<Contents />} />[
                 <Route path="/contents/:contentType" element={<ContentsByTypes />} />
                 <Route path="/contents/papers/:paperSlug" element={<PageDetail/>} />

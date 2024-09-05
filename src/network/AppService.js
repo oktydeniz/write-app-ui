@@ -41,7 +41,7 @@ export const getPageByUser = (slug, user) => {
   return baseFetch(`/papers/find/${user}/${slug}`, { method: "GET" });
 };
 
-const baseFetch = async (endpoint, options) => {
+export const baseFetch = async (endpoint, options) => {
   try {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
