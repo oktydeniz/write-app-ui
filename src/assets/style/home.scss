@@ -6,3 +6,59 @@
 .css-19kzrtu {
   padding: 0 !important;
 }
+
+.css-15zrpwy {
+  width: auto  !important;
+}
+
+.css-7j7ogg {
+  width: auto  !important;
+}
+.home-img {
+  max-height: 350px;
+}
+
+.home-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .home-cover {
+    flex: 1;
+  }
+  .home-detail {
+    flex: 3;
+  }
+}
+
+.rating-area {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.author-link {
+  color: gray;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+
+.book-tags {
+  display: flex;
+  flex-direction: row;
+  justify-content:flex-start;
+  align-items:center;
+  margin-bottom:0px;
+  position: relative;
+}
+
+.section-item {
+  width: 100%;
+  height: 52px;
+  display: flex;
+
+}
