@@ -14,7 +14,7 @@ import Message from 'home/Message';
 import ContentsByTypes from 'home/content/ContentsByTypes';
 import PageDetail from 'home/PageDetail';
 import BookDetail from 'home/pages/book/BookDetail';
-
+import Section from 'home/pages/book/Section';
 const App = () => {
  
   return (
@@ -31,6 +31,8 @@ const App = () => {
                 <Route index element={<Home />} />
                 <Route path="/home" element={<Home />} />[
                   <Route path="/home/:user/:slug" element={<BookDetail/>} />
+                  <Route path="/home/:user" element={<Section/>} />
+                  <Route path="/home/:user/:slug/:sectionId" element={<Section/>} />
                 ]
                 <Route path="/contents" element={<Contents />} />[
                 <Route path="/contents/:contentType" element={<ContentsByTypes />} />

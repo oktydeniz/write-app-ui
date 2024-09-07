@@ -11,3 +11,15 @@ export const fetchBook = (slug, user) => {
     method: "GET",
   });
 };
+
+export const fetchPapers = () => {
+  return baseFetch(`/home/papers`, {
+    method: "GET",
+  })
+}
+
+export const fetchSection= (section) => {
+  return baseFetch(`/home/sections/${section}`, {
+    method: "GET",
+  })
+}

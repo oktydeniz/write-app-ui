@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "assets/style/home.scss";
 import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
+
 import { fetchBook } from "network/LibraryService";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
@@ -17,11 +18,13 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { updateBookmarkInfo } from "network/ContentService";
 import CheckIcon from "@mui/icons-material/Check";
+import { useNavigate } from "react-router-dom";
 
 const BookDetail = () => {
   const { slug, user } = useParams();
   const [book, setBook] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+
 
   useEffect(() => {
     const getBook = async () => {
@@ -30,7 +33,6 @@ const BookDetail = () => {
         const book = response.book;
         setBook(book);
         setIsBookmarked(book.bookmarked);
-        console.log(book);
       }
     };
     getBook();
@@ -153,13 +155,18 @@ function a11yProps(index) {
 
 function BasicTabs({ book }) {
   const [value, setValue] = React.useState(0);
-
+  const navigate = useNavigate();
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  
+  
+  const onClickedSectionItem = (currentSection) => {
+    navigate(`/home/${book.createdBy.userAppName}/${book.slug}/${currentSection.id}`);
+  }
 
   return (
-    <Box sx={{ width: "100%", margin:'10px' }}>
+    <Box sx={{ width: "100%", margin: "10px" }}>
       <Box>
         <Tabs value={value} onChange={handleChange} aria-label="tabs for">
           <Tab label="Sections" {...a11yProps(0)} />
@@ -173,6 +180,7 @@ function BasicTabs({ book }) {
           <SectionItem
             key={section.id}
             section={section}
+            onClickedAction={onClickedSectionItem}
             index={index}
             userProgresses={book.userProgresses}
           />
@@ -190,7 +198,7 @@ function BasicTabs({ book }) {
     </Box>
   );
 }
-const SectionItem = ({ section, index, userProgresses }) => {
+const SectionItem = ({ section, index, userProgresses,onClickedAction }) => {
   const status = getSectionStatus(section.id, userProgresses);
 
   const sectionStyle = {
@@ -208,12 +216,13 @@ const SectionItem = ({ section, index, userProgresses }) => {
     <Box
       className="section-item"
       key={index}
+      onClick={() => onClickedAction(section)}
       sx={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         padding: "16px",
-        marginTop:"10px",
+        marginTop: "10px",
         backgroundColor: sectionStyle.backgroundColor,
         borderRadius: "8px",
         color: sectionStyle.color,
@@ -223,7 +232,6 @@ const SectionItem = ({ section, index, userProgresses }) => {
         opacity: sectionStyle.opacity,
       }}
     >
-      {/* Sol taraf: Section ismi ve yazar */}
       <Box sx={{ display: "flex", alignItems: "center", width: "80%" }}>
         <Typography sx={{ width: "auto", flexShrink: 0, fontWeight: "bold" }}>
           {`${section.sectionName}`}
@@ -235,15 +243,12 @@ const SectionItem = ({ section, index, userProgresses }) => {
             {`${section.sectionDesc}`}
           </Typography>
         )}
-
         <Typography
           sx={{ fontSize: "0.875rem", color: "gray", marginLeft: "8px" }}
         >
           {`Written by @${section.user.userAppName}`}
         </Typography>
       </Box>
-
-      {/* Sağ taraf: Duruma göre ikon */}
       <Box sx={{ display: "flex", alignItems: "center" }}>
         {status === "completed" ? <CheckIcon /> : <ChevronRightIcon />}
       </Box>

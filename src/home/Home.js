@@ -68,7 +68,7 @@ const Home = () => {
             variant="fullWidth"
             aria-label="full width tabs example"
             TabIndicatorProps={{
-              style: { display: "none" }, // Indicator'ı kaldırmak için
+              style: { display: "none" },
             }}
           >
             <Tab
@@ -77,12 +77,12 @@ const Home = () => {
               sx={{
                 backgroundColor: "gray",
                 borderRadius: "16px",
-                mx: 1, // Margin between tabs
+                mx: 1,
                 color: "white",
                 height: "30px",
                 minHeight: "30px",
                 "&.Mui-selected": {
-                  backgroundColor: "blue", // Seçili tab için arka plan rengi
+                  backgroundColor: "blue",
                   color: "white",
                 },
               }}
