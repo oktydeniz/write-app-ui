@@ -120,7 +120,8 @@ const CreateBook = ({ createOpen, handleClose }) => {
       currency: selectedCurrent,
       contentTypeId: selectedValue,
       tags: selectedTags,
-      isFree: isChecked,
+      //isFree: isChecked,
+      isFree: true,
       language: selectedLanguage,
       copyright: copyright,
     };
@@ -329,7 +330,9 @@ const CreateBook = ({ createOpen, handleClose }) => {
               onChange={handleAbout}
               rows={6}
             />
-            <FormGroup>
+            {
+              /*
+              <FormGroup>
               <Box
                 sx={{
                   display: "flex",
@@ -381,6 +384,8 @@ const CreateBook = ({ createOpen, handleClose }) => {
                 )}
               </Box>
             </FormGroup>
+               */
+            }
           </div>
         </div>
         <div className="selects">

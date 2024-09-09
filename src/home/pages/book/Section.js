@@ -1,78 +1,37 @@
 import { fetchSection } from "network/LibraryService";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { useParams } from "react-router-dom";
-import DOMPurify from "dompurify";
 import {
   Box,
   Typography,
-  Menu,
-  MenuItem
+  TextField,
+  Rating,
+  Button,
 } from "@mui/material";
+import {
+  saveCommentSections,
+  getSectionComment,
+  updateSectionComment,
+  deleteCommentSection
+} from "network/CommentService";
+import { getUserCurrentId } from "network/Constant";
+import CommentSection from "./CommentSection";
 
 const Section = ({}) => {
+  const sectionTitleRef = useRef(null);
   const { sectionId } = useParams();
-
   const [section, setSection] = useState(null);
   const [sections, setSections] = useState([]);
   const [userProgress, setUserProgress] = useState([]);
   const [expandedSection, setExpandedSection] = useState(null);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [userComment, setUserComments] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [openForEdit, setOpenForEdit] = useState(false);
+  const [openedCommentForEdit, setOpenedCommentForEdit] = useState(null);
 
-  // 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedText, setSelectedText] = useState("");
-  const [highlights, setHighlights] = useState([]);
-
-  const handleContextMenu = (event) => {
-    event.preventDefault();
-
-    const selection = window.getSelection().toString().trim(); // Get the selected text
-    if (selection) {
-      setSelectedText(selection);
-      setAnchorEl(event.currentTarget); // Show context menu at the click location
-    }
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleHighlight = (color) => {
-    // Add the selected text to the highlights with the specified color
-    setHighlights((prev) => [
-      ...prev,
-      { text: selectedText, color: color },
-    ]);
-    handleClose();
-  };
-
-  const handleComment = () => {
-    // Handle adding a comment to the selected text
-    alert(`Add a comment to: ${selectedText}`);
-    handleClose();
-  };
-
-  const renderPassage = () => {
-    //TODO boroken  
-    let sanitizedPassage = DOMPurify.sanitize(section.passage);
-  
-    // Convert sanitized passage to an array of characters for manipulation
-    let charArray = sanitizedPassage.split('');
-  
-    highlights.forEach(({ start, end, color }) => {
-      // Wrap the selected text with a span for highlighting
-      for (let i = start; i < end; i++) {
-        charArray[i] = `<span style="background-color: ${color}">${charArray[i]}</span>`;
-      }
-    });
-  
-    // Join characters back to a string
-    const highlightedPassage = charArray.join('');
-  
-    return highlightedPassage;
-  };
-
-
-//
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -80,9 +39,12 @@ const Section = ({}) => {
         if (response.success) {
           const data = response.section;
           setSection(data.askedSection);
-          setSections(data.section);
+          setSections(data.section.reverse());
           setUserProgress(data.userProgress);
           setExpandedSection(data.askedSection.id || data.section[0].id);
+          setIsOwner(data.askedSection.user.id === getUserCurrentId());
+          getSectionCommends(data.askedSection.id);
+          setOpenForEdit(false);
         }
       } catch (e) {
         console.log(e);
@@ -91,14 +53,119 @@ const Section = ({}) => {
     fetchData();
   }, []);
 
+  const handleNextSection = () => {
+    const currentIndex = sections.findIndex((s) => s.id === section.id);
+    if (currentIndex !== -1 && currentIndex + 1 < sections.length) {
+      const nextSection = sections[currentIndex + 1];
+      handleAccordionChange(nextSection.id);
+      setTimeout(() => {
+
+        sectionTitleRef.current.scrollTo(0, 0)
+      }, 100);
+    }
+  };
+  
+  const handlePreviousSection = () => {
+    const currentIndex = sections.findIndex((s) => s.id === section.id);
+    if (currentIndex > 0) {
+      const previousSection = sections[currentIndex - 1];
+      handleAccordionChange(previousSection.id);
+      setTimeout(() => {
+        sectionTitleRef.current.scrollTo(0, 0)
+      }, 100); 
+    }
+  };
+
   const handleAccordionChange = (id) => {
+    setOpenForEdit(false);
     const selectedSection = sections.find((s) => s.id === id);
     if (selectedSection) {
       setSection(selectedSection);
       setExpandedSection(selectedSection.id);
+      setComment("");
+      setRating(0);
+      getSectionCommends(selectedSection.id);
+      setIsOwner(selectedSection.user.id === getUserCurrentId());
     }
   };
 
+  const handleSubmitComment = async () => {
+    if (comment.trim()) {
+      setComment("");
+    }
+    if (!openForEdit) {
+      var data = {
+        comment: comment,
+        section: section.id,
+        rating: rating,
+      };
+      try {
+        const result = await saveCommentSections(data);
+        if (result) {
+          getSectionCommends(section.id);
+
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      var data = {
+        commentId: openedCommentForEdit,
+        rating: rating,
+        comment: comment,
+        section: section.id,
+      };
+      try {
+        const response = await updateSectionComment(data);
+        if (response) {
+          getSectionCommends(section.id);
+        
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const getSectionCommends = async (id) => {
+    setComments([]);
+    setUserComments(null);
+    setComment("");
+    setRating(0);
+    setOpenForEdit(false);
+    try {
+      const data = await getSectionComment(id);
+      if (data.success) {
+        setComments(data.comments);
+        setUserComments(data.userComment);
+        if (data.userComment) {
+          setRating(data.userComment.rating);
+          setComment(data.userComment.comment);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleEdit = async (currentComment) => {
+    setOpenForEdit(true);
+    setRating(currentComment.rating);
+    setComment(currentComment.comment);
+    setOpenedCommentForEdit(currentComment.id);        
+  };
+
+  const handleDelete = async (currentComment) => {
+    try {
+      const response = await deleteCommentSection(currentComment.id);
+      if(response) {
+        getSectionCommends(section.id);
+      }
+    }catch(e) {
+      console.log(e);
+    }
+  };
+  
   const isComplete = (id) => {
     const progress = userProgress.find((p) => p.section.id === id);
     return progress ? progress.isCompleted : false;
@@ -119,7 +186,7 @@ const Section = ({}) => {
   }
 
   return (
-    <Box display="flex" height="100vh">
+    <Box display="flex" height="100vh" >
       <Box
         width="20%"
         sx={{ overflowY: "auto", borderRight: "1px solid #ddd" }}
@@ -171,37 +238,67 @@ const Section = ({}) => {
             </Typography>
           )}
         </Box>
-        <Box mt={2} onContextMenu={handleContextMenu}>
-      <Box
-        className="section-content"
-        dangerouslySetInnerHTML={{
-          __html: renderPassage(),
-        }}
-      />
-      <Menu
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-      >
-        <MenuItem onClick={handleComment}>Add Comment</MenuItem>
-        <MenuItem onClick={() => handleHighlight("yellow")}>
-          Highlight Yellow
-        </MenuItem>
-        <MenuItem onClick={() => handleHighlight("green")}>
-          Highlight Green
-        </MenuItem>
-        <MenuItem onClick={() => handleHighlight("blue")}>
-          Highlight Blue
-        </MenuItem>
-        <MenuItem onClick={() => handleHighlight("red")}>
-          Highlight Red
-        </MenuItem>
-      </Menu>
-    </Box>
+        <Box
+        ref={sectionTitleRef}
+          className="section-content"
+          dangerouslySetInnerHTML={{
+            __html: section.passage,
+          }}
+        />
+        {((!isOwner && userComment === null) || openForEdit) && (
+          <Box mt={4}>
+            {" "}
+            <Rating
+              sx={{ marginTop: "2px" }}
+              name="section-rating"
+              value={rating}
+              onChange={(event, newValue) => {
+                setRating(newValue);
+              }}
+            />
+            <Box mt={1}>
+              <TextField
+                label="Yorumunuzu yazın"
+                fullWidth
+                multiline
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={handleSubmitComment}
+              >
+                Yorum Yap
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        <CommentSection comments={comments} handleEdit={handleEdit} handleDelete={handleDelete} />
+        <Box mt={4} display="flex" justifyContent="space-between">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handlePreviousSection}
+            disabled={sections.findIndex((s) => s.id === section.id) === 0}
+          >
+            Önceki Bölüme Git
+          </Button>
+
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleNextSection}
+            disabled={
+              sections.findIndex((s) => s.id === section.id) ===
+              sections.length - 1
+            }
+          >
+            Sonraki Bölüme Geç
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

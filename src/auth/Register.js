@@ -149,10 +149,12 @@ const Register = () => {
                             <hr className="hr-or"/>
                             <div className="or-txt">Or</div>
                         </div>
-                        <div className="login-other-box">
+                        {
+/*<div className="login-other-box">
                             <img src={google}/>
-                            <span>Sign up with Google</span>
-                        </div>
+                            <span>Sign in with Google</span>
+                        </div> */
+                        }
                         <div className="alignCenter mt20">Yes i have an account? <span onClick={(e) => navigate("/login")} className="link">Login</span></div>
                         <div className="info-right-reserved">© 2024 | WhitePulp Media | ALL RIGHTS RESERVED</div>
                     </div>

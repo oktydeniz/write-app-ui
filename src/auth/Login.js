@@ -78,10 +78,13 @@ const Login = () => {
                             <hr className="hr-or"/>
                             <div className="or-txt">Or</div>
                         </div>
-                        <div className="login-other-box">
+                        {
+/*<div className="login-other-box">
                             <img src={google}/>
                             <span>Sign in with Google</span>
-                        </div>
+                        </div> */
+                        }
+                        
                         <div className="alignCenter mt20">Don't you have an account? <span onClick={(e) => {
                             navigate('/register')
                         }} className="link">Sign up</span></div>

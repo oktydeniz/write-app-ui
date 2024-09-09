@@ -9,6 +9,8 @@ import {
   Box,
   Typography,
   Rating,
+  TextField,
+  Button,
   Tabs,
   Chip,
   IconButton,
@@ -19,12 +21,19 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { updateBookmarkInfo } from "network/ContentService";
 import CheckIcon from "@mui/icons-material/Check";
 import { useNavigate } from "react-router-dom";
+import CommentSection from "./CommentSection";
+import {
+  fetchBookComments,
+  updateBookComment,
+  deleteBookSection,
+  saveBookSections,
+} from "network/CommentService";
+import { getUserCurrentId } from "network/Constant";
 
 const BookDetail = () => {
   const { slug, user } = useParams();
   const [book, setBook] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
-
 
   useEffect(() => {
     const getBook = async () => {
@@ -154,16 +163,103 @@ function a11yProps(index) {
 }
 
 function BasicTabs({ book }) {
+
   const [value, setValue] = React.useState(0);
   const navigate = useNavigate();
+  const [comments, setComments] = useState([]);
+  const [userComment, setUserComment] = useState();
+  const [comment, setComment] = useState("");
+  const [rating, setRating] = useState(0);
+  const [openForEdit, setOpenForEdit] = useState(false);
+  const [openedCommentForEdit, setOpenedCommentForEdit] = useState(null);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-  
-  
+
   const onClickedSectionItem = (currentSection) => {
-    navigate(`/home/${book.createdBy.userAppName}/${book.slug}/${currentSection.id}`);
-  }
+    navigate(
+      `/home/${book.createdBy.userAppName}/${book.slug}/${currentSection.id}`
+    );
+  };
+
+  const handleDelete = async (item) => {
+    try {
+      const response = await deleteBookSection(item.id);
+      if (response) {
+        fetchComments(book.id);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleEdit = (currentComment) => {
+    setOpenForEdit(true);
+    setRating(currentComment.rating);
+    setComment(currentComment.comment);
+    setOpenedCommentForEdit(currentComment.id);  
+  };
+
+  const fetchComments = async (id) => {
+    setRating(0);
+    setComment("");
+    setOpenForEdit(false);
+    try {
+      const data = await fetchBookComments(id);
+      if (data.success) {
+        setComments(data.comments);
+        setUserComment(data.userComment);
+        setRating(data.userComment.rating);
+        setComment(data.userComment.comment);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useState(() => {
+    fetchComments(book.id);
+  }, []);
+
+  const handleSubmitComment = async () => {
+    if (comment.trim()) {
+      setComment("");
+    }
+
+    if (!openForEdit) {
+      var data = {
+        comment: comment,
+        section: book.id,
+        rating: rating,
+      };
+      try {
+        const result = await saveBookSections(data);
+        if (result) {
+          fetchComments(book.id);
+
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      var data = {
+        commentId: openedCommentForEdit,
+        rating: rating,
+        comment: comment,
+        section: book.id,
+      };
+      try {
+        const response = await updateBookComment(data);
+        if (response) {
+          fetchComments(book.id);
+        
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   return (
     <Box sx={{ width: "100%", margin: "10px" }}>
@@ -172,7 +268,7 @@ function BasicTabs({ book }) {
           <Tab label="Sections" {...a11yProps(0)} />
           <Tab label="Commneds" {...a11yProps(1)} />
           <Tab label="Comminity" {...a11yProps(1)} />
-          <Tab label="Detail" {...a11yProps(2)} />
+          {/*<Tab label="Detail" {...a11yProps(2)} /> */}
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -187,7 +283,42 @@ function BasicTabs({ book }) {
         ))}
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        Item Two
+        {((book.createdBy.id != getUserCurrentId() && userComment === null) || openForEdit)&& (
+          <Box mt={4}>
+            {" "}
+            <Rating
+              sx={{ marginTop: "2px" }}
+              name="section-rating"
+              value={rating}
+              onChange={(event, newValue) => {
+                setRating(newValue);
+              }}
+            />
+            <Box mt={1}>
+              <TextField
+                label="Yorumunuzu yazın"
+                fullWidth
+                multiline
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={handleSubmitComment}
+              >
+                Yorum Yap
+              </Button>
+            </Box>
+          </Box>
+        )}
+        <Box mt={4}></Box>
+        <CommentSection
+          comments={comments}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+        />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         Item Three
@@ -198,7 +329,7 @@ function BasicTabs({ book }) {
     </Box>
   );
 }
-const SectionItem = ({ section, index, userProgresses,onClickedAction }) => {
+const SectionItem = ({ section, index, userProgresses, onClickedAction }) => {
   const status = getSectionStatus(section.id, userProgresses);
 
   const sectionStyle = {

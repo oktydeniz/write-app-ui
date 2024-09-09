@@ -303,10 +303,13 @@ const ContentDetail = () => {
                 <Tab label="Sections" {...a11yProps(0)} />
                 <Tab label="Notes" {...a11yProps(1)} />
                 <Tab label="Authors" {...a11yProps(2)} />
-                <Tab label="Comments" {...a11yProps(3)} />
+                {/* <Tab label="Comments" {...a11yProps(3)} /> 
+                
                 {content.createdBy.id === getUserCurrentId() && (
-                  <Tab label="More" {...a11yProps(4)} />
+                 {  <Tab label="More" {...a11yProps(4)} />}
                 )}
+                */ }
+                
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>

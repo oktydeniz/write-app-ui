@@ -21,7 +21,6 @@ const ContentsByTypes = () => {
       try {
         const response = await getUserContentsByType(contentType);
         setContents(response.contents);
-        console.log(response.contents);
       } catch (error) {
         console.error("Error fetching contents:", error);
       } finally {

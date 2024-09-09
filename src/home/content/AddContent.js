@@ -174,7 +174,7 @@ const AddContent = ({ open, handleClose, actionHandler, content }) => {
       currency: checkValue(selectedCurrent),
       contentTypeId: checkValue(selectedValue),
       tags: selectedTags.map((tag) => checkValue(tag)),
-      isFree: isChecked,
+      isFree: true,
       language: checkValue(selectedLanguage),
     };
     try {
@@ -282,6 +282,7 @@ const AddContent = ({ open, handleClose, actionHandler, content }) => {
               onChange={handleAbout}
               rows={6}
             />
+            {/* 
             <FormGroup>
               <Box
                 sx={{
@@ -334,7 +335,7 @@ const AddContent = ({ open, handleClose, actionHandler, content }) => {
                   </>
                 )}
               </Box>
-            </FormGroup>
+            </FormGroup>*/}
           </div>
         </div>
         <div className="selects">
