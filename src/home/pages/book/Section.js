@@ -12,7 +12,8 @@ import {
   saveCommentSections,
   getSectionComment,
   updateSectionComment,
-  deleteCommentSection
+  deleteCommentSection,
+  updateSectionProgress
 } from "network/CommentService";
 import { getUserCurrentId } from "network/Constant";
 import CommentSection from "./CommentSection";
@@ -54,16 +55,27 @@ const Section = ({}) => {
   }, []);
 
   const handleNextSection = () => {
+    
     const currentIndex = sections.findIndex((s) => s.id === section.id);
     if (currentIndex !== -1 && currentIndex + 1 < sections.length) {
       const nextSection = sections[currentIndex + 1];
       handleAccordionChange(nextSection.id);
+      saveProgress(sections[currentIndex]);
       setTimeout(() => {
 
         sectionTitleRef.current.scrollTo(0, 0)
       }, 100);
     }
   };
+
+  const saveProgress = async (section) => {
+    var data = {
+      section: section.id,
+      isCompleted:true,
+      progressPercentage:100,
+    }
+    updateSectionProgress(data);
+  }
   
   const handlePreviousSection = () => {
     const currentIndex = sections.findIndex((s) => s.id === section.id);

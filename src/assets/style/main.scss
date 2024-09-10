@@ -394,3 +394,21 @@ input:focus {
 .flex2 {
   flex:2 !important;
 }
+
+.home-icon {
+  margin-right: 5px;
+}
+
+.app-name {
+  color:#ddd;
+  text-decoration: none;
+  &:hover {
+    text-decoration: none;
+  }
+}
+.logout-btn {
+  background-color: transparent;
+  &:hover {
+    background-color:blue;
+  }
+}

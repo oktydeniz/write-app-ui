@@ -275,15 +275,6 @@ const ContentDetail = () => {
                     />
                   ))}
                 </Grid>
-                <Grid
-                  container
-                  justifyContent="space-between"
-                  sx={{ marginTop: 2 }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    {content.averageRating}
-                  </Typography>
-                </Grid>
               </Grid>
             </Grid>
           </Card>
@@ -303,13 +294,10 @@ const ContentDetail = () => {
                 <Tab label="Sections" {...a11yProps(0)} />
                 <Tab label="Notes" {...a11yProps(1)} />
                 <Tab label="Authors" {...a11yProps(2)} />
-                {/* <Tab label="Comments" {...a11yProps(3)} /> 
-                
+               {/* <Tab label="Comments" {...a11yProps(3)} />  */}
                 {content.createdBy.id === getUserCurrentId() && (
-                 {  <Tab label="More" {...a11yProps(4)} />}
+                   <Tab label="More" {...a11yProps(3)} />
                 )}
-                */ }
-                
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -425,8 +413,8 @@ const ContentDetail = () => {
             <CustomTabPanel value={value} index={2}>
               <Authors content={content} />
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={3}></CustomTabPanel>
-            <CustomTabPanel value={value} index={4}>
+            {/*<CustomTabPanel value={value} index={3}></CustomTabPanel> */}
+            <CustomTabPanel value={value} index={3}>
               <ContentMoreOptions content={content} />
             </CustomTabPanel>
           </Box>

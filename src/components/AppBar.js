@@ -20,17 +20,6 @@ const AppBar = () => {
           </div>
           <div className="avatar">
             <img src="https://via.placeholder.com/40" alt="User Avatar" />
-        
-              <div className="dropdown-menu">
-                <div className="dropdown-header">Team</div>
-                <NavLink to="/team-a" className="dropdown-item">Team A</NavLink>
-                <NavLink to="/team-b" className="dropdown-item">Team B</NavLink>
-                <hr className="dropdown-divider" />
-                <NavLink to="/account" className="dropdown-item">Account</NavLink>
-                <NavLink to="/settings" className="dropdown-item">Settings</NavLink>
-                <NavLink to="/logout" className="dropdown-item">Logout</NavLink>
-              </div>
-            
           </div>
         </div>
       </div>

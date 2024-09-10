@@ -56,3 +56,10 @@ export const deleteBookSection = (id) => {
     method: "DELETE",
   })
 }
+
+export const updateSectionProgress = (req) => {
+  return baseFetch(`/content/progress-section`, {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
