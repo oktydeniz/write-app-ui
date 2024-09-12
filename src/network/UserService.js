@@ -1,4 +1,24 @@
 import { BASE_URL, getToken, userLanguage, getUserId } from "./Constant";
+const { baseFetch } = require("./AppService");
+
+export const fetchUserInfo = (user) => {
+  return baseFetch(`/users/${user}`, { 
+    method: 'GET',
+  })
+}
+export const updateUserInfo = (req) => {
+  return baseFetch(`/users/update`, { 
+    method: 'POST',
+    body: JSON.stringify(req)
+  })
+}
+
+
+export const deleteUserInfo = () => {
+  return baseFetch(`/users/delete`, { 
+    method: 'DELETE',
+  })
+}
 
 export const getUsers = async (q) => {
   try {

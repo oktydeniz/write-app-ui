@@ -23,3 +23,10 @@ export const fetchSection= (section) => {
     method: "GET",
   })
 }
+
+export const updateVisitCount = (id) => {
+  return baseFetch(`/home/visit-count`, {
+    method: "PATCH",
+    body: JSON.stringify(id)
+  })
+}

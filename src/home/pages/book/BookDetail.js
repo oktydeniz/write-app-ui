@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect} from "react";
 import "assets/style/home.scss";
 import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
-
-import { fetchBook } from "network/LibraryService";
+import { fetchBook, updateVisitCount } from "network/LibraryService";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
   Box,
@@ -42,6 +41,9 @@ const BookDetail = () => {
         const book = response.book;
         setBook(book);
         setIsBookmarked(book.bookmarked);
+        if(book.createdBy.id !== getUserCurrentId()){
+          updateClickedCount(book.id);
+        }
       }
     };
     getBook();
@@ -68,6 +70,14 @@ const BookDetail = () => {
     }
   };
 
+  const updateClickedCount = async (bookId) => {
+    console.log(bookId);
+    try {
+      await updateVisitCount(bookId);
+    }catch(e){
+    }
+  }
+
   if (!book) {
     return <p>Something is broken</p>;
   }
@@ -91,9 +101,11 @@ const BookDetail = () => {
                   />
                 ))}
               </div>
-              <IconButton onClick={handleToggleBookmark}>
+              {
+                book.createdBy.id !== getUserCurrentId() && <IconButton onClick={handleToggleBookmark}>
                 {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
               </IconButton>
+              }
             </div>
             <Typography sx={{ marginBottom: "0px" }} variant="h4" gutterBottom>
               {book.name}{" "}
@@ -139,7 +151,7 @@ function CustomTabPanel(props) {
   return (
     <div
       role="tabpanel"
-      hidden={value !== index}
+      hidden={value != index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
@@ -210,8 +222,8 @@ function BasicTabs({ book }) {
       if (data.success) {
         setComments(data.comments);
         setUserComment(data.userComment);
-        setRating(data.userComment.rating);
-        setComment(data.userComment.comment);
+        setRating(data.userComment ? data.userComment.rating : 0);
+        setComment(data.userComment? data.userComment.comment : "");
       }
     } catch (e) {
       console.log(e);

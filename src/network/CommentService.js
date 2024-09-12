@@ -1,5 +1,4 @@
 const { baseFetch } = require("./AppService");
-const { BASE_URL } = require("./Constant");
 
 export const saveCommentSections = (req) => {
   return baseFetch(`/comment/section`, {

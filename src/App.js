@@ -15,6 +15,8 @@ import ContentsByTypes from 'home/content/ContentsByTypes';
 import PageDetail from 'home/PageDetail';
 import BookDetail from 'home/pages/book/BookDetail';
 import Section from 'home/pages/book/Section';
+import Account from 'home/Account';
+
 const App = () => {
  
   return (
@@ -43,7 +45,7 @@ const App = () => {
                 <Route path="/bookmarks" element={<Home />} />
                 <Route path="/messages" element={<Message />} />
                 <Route path="/notifications" element={<Notification/>} />
-                <Route path="/account" element={<Home />} />
+                <Route path="/account" element={<Account />} />
                 <Route path="/settings" element={<Home />} />
                 <Route path="/help" element={<Home />} />
                 <Route path="/logout" element={<Home />} />

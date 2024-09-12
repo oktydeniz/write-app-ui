@@ -195,7 +195,7 @@ const AddNote = ({ edit, content, trigger, handleClose, open }) => {
             <label htmlFor="image-upload">
               <CardMedia
                 component="img"
-                image={imageUrl || "https://via.placeholder.com/150"}
+                image={imageUrl || "https://placehold.jp/150x150.png"}
                 alt="Note Image"
                 sx={{
                   width: 150,

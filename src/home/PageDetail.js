@@ -211,7 +211,7 @@ const PageDetail = () => {
         setSelectedLanguage(languageObject);
         setDesc(fetchedData.desc);
         setImageSrc(
-          fetchedData.img ? fetchedData.img : "https://via.placeholder.com/150"
+          fetchedData.img ? fetchedData.img : "https://placehold.jp/150x150.png"
         );
         fetchGenre(fetchedData);
       }

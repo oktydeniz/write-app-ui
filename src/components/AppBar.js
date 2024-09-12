@@ -19,7 +19,7 @@ const AppBar = () => {
             <span className="badge">5</span>
           </div>
           <div className="avatar">
-            <img src="https://via.placeholder.com/40" alt="User Avatar" />
+            <img src="https://placehold.jp/150x150.png" alt="User Avatar" />
           </div>
         </div>
       </div>
