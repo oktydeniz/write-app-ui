@@ -20,6 +20,12 @@ export const deleteUserInfo = () => {
   })
 }
 
+export const deleteUserProgress = () => {
+  return baseFetch(`/users/delete-progress`, { 
+    method: 'DELETE',
+  })
+}
+
 export const getUsers = async (q) => {
   try {
     const response = await fetch(`${BASE_URL}/users/search/${q}`, {

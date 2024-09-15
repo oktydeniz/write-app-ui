@@ -28,6 +28,7 @@ import {
   saveBookSections,
 } from "network/CommentService";
 import { getUserCurrentId } from "network/Constant";
+import CommunityPanel from "home/pages/CommunityPanel";
 
 const BookDetail = () => {
   const { slug, user } = useParams();
@@ -333,7 +334,7 @@ function BasicTabs({ book }) {
         />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        Item Three
+        <CommunityPanel userId={getUserCurrentId()} book={book} />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
         Item 4

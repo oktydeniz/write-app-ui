@@ -1,5 +1,10 @@
 import { getUserCurrentId } from "network/Constant";
-import { fetchUserInfo, updateUserInfo,deleteUserInfo } from "network/UserService";
+import {
+  fetchUserInfo,
+  updateUserInfo,
+  deleteUserInfo,
+  deleteUserProgress,
+} from "network/UserService";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -25,12 +30,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { handleUploadNativeFile } from "network/AppService";
 
 const Account = ({}) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const fileInputRefBanner = useRef(null);
   const [isEnableMail, setIsEnableMail] = useState(false);
   const [isEnablePhone, setIsEnablePhone] = useState(false);
-  const [errors, setErrors] = useState('');
+  const [errors, setErrors] = useState("");
   const [imageSrc, setImageSrc] = useState(null);
   const [imageSrcBanner, setImageSrcBanner] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
@@ -63,18 +68,22 @@ const Account = ({}) => {
 
   const handleDeleteAccount = async () => {
     try {
-        const response = await deleteUserInfo();
-        if(response.success){
-            localStorage.clear();
-    navigate("/login");
-        }
-    }catch(e) {
-        console.log(e);
+      const response = await deleteUserInfo();
+      if (response.success) {
+        localStorage.clear();
+        navigate("/login");
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
-  const handleDeleteProgress = () => {
-    console.log("Progress deleted");
+  const handleDeleteProgress = async () => {
+    try {
+      const response = await deleteUserProgress();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const handleFileChange = (event) => {
@@ -159,11 +168,11 @@ const Account = ({}) => {
     try {
       const response = await updateUserInfo(data);
       if (response.success) {
-      }else {
+      } else {
         setErrors("AppName is in Use please try another one!");
       }
     } catch (error) {
-        setErrors(error.message);
+      setErrors(error.message);
     }
   };
 
@@ -197,6 +206,15 @@ const Account = ({}) => {
 
   return (
     <Box
+    sx={{
+      width: "100%",
+      marginTop: "20px",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+    >
+      <Box
       sx={{
         width: "80%",
         marginTop: "20px",
@@ -266,9 +284,9 @@ const Account = ({}) => {
         </Box>
       </Box>
 
-      <p id="errors"  className="errors"> 
-                            {errors ? errors : null }
-                        </p>
+      <p id="errors" className="errors">
+        {errors ? errors : null}
+      </p>
       <TextField
         onChange={handleChange}
         value={formData.userName}
@@ -329,7 +347,7 @@ const Account = ({}) => {
 
       <Box
         sx={{
-          display: "flex", 
+          display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           padding: 2,
@@ -362,7 +380,7 @@ const Account = ({}) => {
             alignItems="center"
             marginTop="15px"
             justifyContent="flex-end"
-            width="100%" 
+            width="100%"
           >
             <Typography>Private Account</Typography>
             <Switch
@@ -424,6 +442,7 @@ const Account = ({}) => {
           Delete My Progress
         </Typography>
       </Stack>
+    </Box>
     </Box>
   );
 };
