@@ -3,12 +3,12 @@ import Sidebar from './Sidebar';
 import AppBar from './AppBar';
 import { Outlet } from 'react-router-dom';
 
-const Layout = () => {
+const Layout = ({user}) => {
   return (
     <div className="layout">
       <Sidebar />
       <div className="content">
-        <AppBar />
+        <AppBar user={user} />
         <div className="fragment-content">
         <Outlet />
         </div>

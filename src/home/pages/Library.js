@@ -48,14 +48,6 @@ const BookCardItem = ({ contents, showAllAction, cardClicedAction }) => {
   
   return (
     <div className="contents-container">
-      {contents.length > 0 ? (
-        <>
-          <span>My Contents</span>
-          <span onClick={() => showAllAction(0)} className="show-all">
-            Show All
-          </span>
-        </>
-      ) : null}
       <Box className="contents-lists">
         {contents.map((item) => (
           <Card

@@ -20,6 +20,11 @@ export const savePaperData = (req) => {
   });
 };
 
+export const fetchUserInfoRemote = () => {
+  return baseFetch("/users/get-me", {
+    method: "GET",
+  });
+}
 export const updatePaperData = (req) => {
   return baseFetch("/papers", {
     method: "PUT",
