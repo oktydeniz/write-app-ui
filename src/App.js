@@ -23,7 +23,7 @@ import BookDetail from "home/pages/book/BookDetail";
 import Section from "home/pages/book/Section";
 import Account from "home/Account";
 import { fetchUserInfoRemote } from "network/AppService";
-
+import AuthDetail from "home/pages/AuthDetail";
 const App = () => {
   const [user, setUser] = useState(null);
   useEffect(() => {
@@ -67,7 +67,7 @@ const App = () => {
                 <Route index element={<Home />} />
                 <Route path="/home" element={<Home />} />[
                 <Route path="/home/:user/:slug" element={<BookDetail />} />
-                <Route path="/home/:user" element={<Section />} />
+                <Route path="/home/:user" element={<AuthDetail />} />
                 <Route
                   path="/home/:user/:slug/:sectionId"
                   element={<Section />}

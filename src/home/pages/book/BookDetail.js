@@ -110,7 +110,7 @@ const BookDetail = () => {
             </div>
             <Typography sx={{ marginBottom: "0px" }} variant="h4" gutterBottom>
               {book.name}{" "}
-              <a href={`${book.createdBy.userAppName}`} className="author-link">
+              <a href={`/home/${book.createdBy.userAppName}`} className="author-link">
                 /by @{book.createdBy.userAppName}
               </a>
             </Typography>
